@@ -18,8 +18,8 @@
 
 ```bash
 cd ~/code  # 你平时放代码的地方
-git clone git@github.com:CherryInternal/claude-skills.git
-cd claude-skills
+git clone git@github.com:CherryInternal/skills.git
+cd skills
 
 # 单独启用某个 skill
 ln -s "$(pwd)/skills/test-and-report" ~/.claude/skills/test-and-report
@@ -30,7 +30,7 @@ ln -s "$(pwd)/skills/test-and-report" ~/.claude/skills/test-and-report
 ### 方式 2：symlink 全部
 
 ```bash
-cd ~/code/claude-skills
+cd ~/code/skills
 for skill in skills/*/; do
   name=$(basename "$skill")
   ln -sfn "$(pwd)/$skill" ~/.claude/skills/"$name"
