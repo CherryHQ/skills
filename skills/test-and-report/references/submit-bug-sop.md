@@ -221,11 +221,22 @@ lark-cli base +record-upload-attachment \
 
 <Mechanism explanation>
 
-### Suggested fix
+### Proposed Fix
 
-1. ...
-2. ...
-3. ...
+<Tabular form preferred when changes map cleanly to rows (i18n keys, field copy, config values, enum additions):>
+
+| Field | Label | Description | Placeholder |
+|---|---|---|---|
+| ... | ... | ... | ... |
+
+<Otherwise a short numbered list of behavioral changes.>
+
+**Files to touch:**
+- `<path>:<line-range>` — <what changes>
+
+### Out of scope
+
+<Bulleted list of adjacent questions intentionally deferred (separate issue / product decision). Keeps this issue's scope bounded and prevents reviewers from expanding it.>
 
 ### Reproduction
 
@@ -249,6 +260,9 @@ lark-cli base +record-upload-attachment \
 ### 建议修复
 ...
 
+### 不在本 issue 范围
+...
+
 ### 复现方式
 ...
 
@@ -265,25 +279,31 @@ gh issue create --repo <OWNER/REPO> \
 
 ### 6.4 打标签
 
-创建成功后，按问题分类打 label：
+**先看 repo 现有 label**，再决定用什么——不要凭空套 `type:*` 命名空间：
 
 ```bash
-# Bug
-gh issue edit <N> --repo <OWNER/REPO> --add-label "type: bug"
-
-# 体验优化
-gh issue edit <N> --repo <OWNER/REPO> --add-label "type: feature"
+gh label list --repo <OWNER/REPO> --limit 100
 ```
 
-**如果 repo 没有 `type: bug` / `type: feature` label**，先建：
+按优先级挑 label：
 
-```bash
-gh label create "type: bug" --color "d73a4a" --description "Functional defect (bitable: Bug)" --repo <OWNER/REPO>
-gh label create "type: feature" --color "0366d6" --description "UX improvement (bitable: 体验优化)" --repo <OWNER/REPO>
-```
+1. **复用已有 label**：repo 里有 `bug` / `feature` / `BUG` / `enhancement` 这类语义对应的 label，直接用。
+   ```bash
+   gh issue edit <N> --repo <OWNER/REPO> --add-label "<existing>"
+   ```
+2. **没有语义对应**时才建新的：
+   ```bash
+   gh label create "type: bug" --color "d73a4a" --description "Functional defect (bitable: Bug)" --repo <OWNER/REPO>
+   gh label create "type: feature" --color "0366d6" --description "UX improvement (bitable: 体验优化)" --repo <OWNER/REPO>
+   ```
 
-对于 `CherryHQ/cherry-studio`（公开仓库）已有老的 `BUG`/`feature`/`P1`-`P3` 体系，不要新建 `type:*` label 冲突——直接用老的即可。
-对于 `CherryInternal/cherry-studio-enterprise-api`，用 `type:*` 命名空间和 bitable 问题分类对齐。
+**已知仓库约定**：
+- `CherryHQ/cherry-studio`（公开）：用老体系 `BUG`/`feature`/`P1`-`P3`，不要建 `type:*`。
+- `CherryInternal/cherry-studio-enterprise-api`：当前实际使用 `bug` / `feature`（见 #135）。新建 `type:*` 前先 `gh label list` 确认没有语义重复的 label。
+
+**优先级 label**（可选）：
+- CherryHQ 有现成 `P1` / `P2` / `P3` label，bitable 的 P0/P1/P2 映射到 P1/P2/P3 或单独加 `P0`。
+- enterprise-api 目前无优先级 label，需要的话同样 `gh label list` 确认后再建。
 
 ### 6.5 回填 Issue URL 到 bitable
 
