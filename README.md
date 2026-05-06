@@ -14,6 +14,7 @@
 | Skill | 用途 | 典型触发词 |
 |-------|------|------|
 | [test-and-report](skills/test-and-report/) | 陪用户手动测 staging，按规范把 bug 落到飞书多维表格 + GitHub issue 双轨 | `test and report` / `边测边报` / `开始系统测试` / `帮我测 cherry / express saas` / 贴飞书测试文档 + bitable |
+| [prd-creator](skills/prd-creator/) | 跟 PM 讨论 cherry-studio 社区版需求 → 出中英对照 PRD review → 用户确认后建英文 GitHub issue（CherryHQ/cherry-studio）+ 自动加入 Project #3 + 设字段 | `建需求单` / `把这个需求建到 GitHub` / `新建 feature issue` / `draft an issue for...` |
 
 _（请持续补充）_
 
