@@ -12,10 +12,10 @@ This skill helps a PM and an AI agent collaborate on a Cherry Studio requirement
 The skill is a **conversation**, not a one-shot generator. The flow is:
 
 1. **Discuss** — user describes a requirement (often roughly). Agent asks clarifying questions if needed.
-2. **Verify before drafting** — agent reads the linked feedback issues and grep's the repo to ground Background in real product state, not assumptions.
+2. **Research before drafting** — agent searches GitHub issues, PR history (especially closed/abandoned PRs), and repo code to ground Background in real product state — not just the items the user linked.
 3. **Draft bilingually** — agent produces a draft in Chinese + English side-by-side, so the user (Chinese-speaking PM) can review fluently.
 4. **Iterate with cross-section consistency** — when one section changes, agent proactively checks whether sibling sections need updating too.
-5. **Publish English-only** — once confirmed, agent creates the GitHub issue using only the English version. The Chinese gloss is review-only and does NOT enter the issue body.
+5. **Validate & publish** — agent re-checks each linked issue is still relevant (drops stale/tangential links), then creates the English-only GitHub issue, adds it to Project #3, and closes any old issues fully subsumed by the new PRD with a "Tracked in #NEW" note. The Chinese gloss is review-only and does NOT enter the issue body.
 
 ## Why this format
 
@@ -119,12 +119,19 @@ If the user opens with a vague requirement, ask up to 3 clarifying questions bef
 - 关联反馈：有哪些 social feedback / GitHub issue 是这个需求的来源？(if not provided, offer to search via `gh issue list --search`)
 - Priority / Milestone — these go into Project #3 fields, NOT the issue body, but record them for later.
 
-If the user already gives enough detail, skip questions and go straight to step 2.
+If the user already gives enough detail — or if the requirement is concrete enough that you can pick a research keyword without asking — skip questions and go straight to step 2 (research). Don't gate research behind clarifying questions; partial research findings are often the *best* clarifying questions.
 
-### 2. Check for duplicates
+### 2. Research & ground in real product state (REQUIRED)
+
+**Do this every time, even when the requirement looks obvious.** Three parallel searches, then synthesize before drafting. This phase is what prevents misframed Backgrounds — and surfaces related work the user didn't mention.
+
+#### 2A. Issue search — discover related/duplicate reports
+
+Cherry issues are bilingual, so search both languages:
 
 ```bash
-gh issue list --repo CherryHQ/cherry-studio --search "<keyword from requirement>" --state all --limit 10
+gh search issues "<EN keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
+gh search issues "<中文关键词>" --repo CherryHQ/cherry-studio --state all --limit 20
 ```
 
 Also check Project #3:
@@ -133,37 +140,57 @@ Also check Project #3:
 gh api graphql -f query='query{organization(login:"CherryHQ"){projectV2(number:3){items(first:50){nodes{content{__typename ... on Issue{number title state}}}}}}}'
 ```
 
-If a strong match exists, recommend **reusing** that issue (update its body) instead of creating new. Tell the user: "Issue #N already covers this — I suggest updating its body rather than creating a duplicate. Proceed with reuse?" Only create new if the user explicitly chooses to.
-
-### 3. Verify before drafting (REQUIRED)
-
-**Do this every time, even when the requirement looks obvious.** It catches misframings before they ship to GitHub.
-
-For each issue in the user's "Related" list, read the actual content:
+For top candidates, read full content:
 
 ```bash
-gh issue view <number> --repo CherryHQ/cherry-studio --json title,body
+gh issue view <number> --repo CherryHQ/cherry-studio --json title,body,state,comments
 ```
 
-Look for:
-- The actual user pain in the original report (not just the title)
-- Existing workarounds users mention (these often reveal the real product gap)
-- Closed issues with similar titles — read them too, they often contain the proposed-but-not-shipped solution
-- Comments on related PRs
+Look for: actual user pain (not just title), workarounds users mention (they reveal the real gap), and closed issues with similar titles (often contain the proposed-but-not-shipped solution).
 
-Then grep the cherry-studio repo for the feature area to verify current product state:
+If a **strong duplicate** exists, recommend reusing it: "Issue #N already covers this — I suggest updating its body rather than creating a duplicate. Proceed with reuse?" Only create new if the user explicitly chooses.
+
+#### 2B. PR history — find prior attempts
 
 ```bash
-# Use Grep tool, not bash grep
-# Search for keywords from the requirement to find the real constraint
+gh search prs "<keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
 ```
 
-Concrete failure mode this prevents: writing Background that says "users can't do X" when actually X works fine and the real problem is Y. The OpenAI/Anthropic interop PRD almost shipped with a generic "endpoint format mismatch" framing until verification revealed the real pain was Agent mode's hard dependency on Anthropic-format endpoints — a much sharper, more actionable framing.
+For any **closed-but-not-merged** PR that looks related, read it:
 
-If verification reveals facts the user didn't mention, surface them before drafting:
+```bash
+gh pr view <number> --repo CherryHQ/cherry-studio --json title,body,state,closedAt,comments
+```
+
+The "why was this abandoned" answer is often the real constraint behind the new requirement. Merged PRs that touch the same area also matter — they tell you what already shipped, so Background doesn't claim "users can't do X" when X partially works.
+
+#### 2C. Repo code — verify current product state
+
+If you have the cherry-studio repo checked out locally, use the Grep tool. Otherwise:
+
+```bash
+gh search code "<keyword>" --repo CherryHQ/cherry-studio --limit 20
+```
+
+Look for what's actually wired up in `packages/aiCore/`, the feature area's components, and any feature flags. The point is to know the *current shape* of the product before claiming what's missing.
+
+#### 2D. Synthesize and surface findings before drafting
+
+After 2A+2B+2C, post a short brief to the user — do NOT skip straight to a draft:
+
+> **Research findings before I draft:**
+> - **Related open issues**: #1234 (same pain, 12 reactions), #5678 (adjacent — UI for X)
+> - **Closed PR #9012** attempted this in 2024-08, abandoned because <reason from PR comments>
+> - **Current state in code**: feature is gated by <flag> and only handles <case>
+>
+> Draft against this picture, or did I miss/misframe something?
+
+If findings contradict the user's framing, flag it explicitly — don't paper over it:
 > "I read #13625 and the agent code — the real constraint is X, not Y as we discussed. Should I draft against that?"
 
-### 4. Draft the bilingual version
+Concrete failure mode this prevents: the OpenAI/Anthropic interop PRD almost shipped with a generic "endpoint format mismatch" framing until research revealed the real pain was Agent mode's hard dependency on Anthropic-format endpoints — a much sharper, more actionable framing.
+
+### 3. Draft the bilingual version
 
 Write English first (it's the source of truth), then mirror in Chinese for review.
 
@@ -182,16 +209,17 @@ Keep these instincts in mind:
 - **Spec** bullets describe behavior at the product level — the *rules*. Free of implementation language.
 - **Verification** bullets describe *specific cases*, not rules. Concrete enough to be mechanically checked.
 
-### 5. Self-check before showing to user
+### 4. Self-check before showing to user
 
 Run this checklist mentally on every draft:
 
+- [ ] **Grounded in research**: Background and Related reflect findings from Step 2 — at least one issue/PR/code fact discovered during research, not only items the user pre-supplied. If research turned up nothing, say so explicitly rather than skipping the check.
 - [ ] **No code references**: Body contains no file paths, function names, library names, or framework references. (Common offenders: `src/`, `packages/`, `.ts`, `.tsx`, `useEffect`, `Redux`, `Drizzle`.)
 - [ ] **Spec ≠ Verification redundancy**: For each Verification bullet, scan the Spec list. If any Verification bullet just rephrases a Spec rule with different words, delete it. Verification should add specifics (named inputs, edge cases, negative checks) that Spec doesn't already imply.
 - [ ] **Examples are current**: Provider examples use CherryIN as primary; model examples are the latest generation, not legacy.
 - [ ] **No filler**: Phrases like "provide a great user experience", "improve user satisfaction", "TBD", "more details to come" — strip them.
 
-### 6. Iterate with cross-section consistency
+### 5. Iterate with cross-section consistency
 
 When the user revises one section, **proactively** check whether sibling sections need updating before re-showing the draft.
 
@@ -203,6 +231,34 @@ Trigger questions to ask the user when appropriate:
 Don't blindly carry old sections forward when the framing shifts. The OpenAI/Anthropic interop PRD went through exactly this — Background was sharpened (Agent unlock as primary pain), and Goal/Spec/Verification all needed re-pivoting to match.
 
 Loop until explicit confirmation ("确认 / OK / 建吧 / yes ship it"). Don't auto-create on a single "looks good" — wait for an unambiguous "build it" signal.
+
+### 6. Re-validate Related links before submit
+
+After the user has said "build it" but **before** `gh issue create` — do one last pass on the `Related` line. The list often grew across iterations, and an issue that *seemed* relevant at draft time may turn out tangential, already-fixed, or duplicated by another link on closer read.
+
+For each `#NNNN` in Related (and any PRs on a `PRs:` line):
+
+```bash
+gh issue view <N> --repo CherryHQ/cherry-studio --json title,state,body,closedAt,stateReason
+```
+
+Check four things:
+
+1. **Still relevant** — does the issue actually describe the same user pain, or only adjacent? If it's tangential, drop it.
+2. **Not stale** — if the issue is `closed` with `stateReason: COMPLETED`, the pain it reports may already be fixed; either drop it or keep it with a note ("originally raised in #X, partially shipped, this requirement extends it").
+3. **No redundancy** — two linked issues that say the same thing add noise. Pick the higher-signal one (more reactions / clearer report) and drop the other.
+4. **Fully subsumed?** — if the new PRD *completely covers* the pain in an old open issue (the old issue's reporter would consider their problem fully solved by what this PRD ships), mark it as a **subsume candidate**. These get closed and pointed at the new issue in Step 8 — but only after the user confirms each one.
+
+If any link is weak, or any look subsumable, surface it before submitting:
+
+> "Re-checked Related:
+> - #11420 still spot-on, keeping.
+> - #12057 is actually about *exporting* memory, not persistence — different feature. Drop from Related?
+> - #6388 and #11420 look **fully covered** by this PRD. Close them after we create the new issue, with a `Tracked in #NEW` comment? (Or keep them open if you want to preserve the discussion threads.)"
+
+After the user confirms the final Related list **and** the subsume list, proceed to Step 7. Do **not** silently re-write Related or pre-commit to closing old issues without telling the user — they may have a reason for keeping a tangential link (e.g., a stakeholder asked for it) or for keeping an old thread open.
+
+This step is fast (most lists are 2-4 items) and catches a common embarrassment: shipping an issue that lists `#X` as "Related" when `#X` was actually closed last week as fixed.
 
 ### 7. Create the issue (English only)
 
@@ -243,7 +299,32 @@ Then output the issue URL with a one-line confirmation: "Added to Project #3 wit
 
 If the GraphQL call fails with a permissions error, ask the user to grant the current `gh` account Write access on Project #3, then retry. Do not silently fall back to "user does it manually" — that loses the workflow.
 
-### 8. Reuse path (when duplicate exists)
+### 8. Close superseded issues (post-create housekeeping)
+
+If Step 6 produced a confirmed **subsume list** — old issues whose pain is fully covered by the new PRD — close them now, *after* the new issue exists (so we can reference its number).
+
+For each subsumed issue `#OLD`:
+
+```bash
+# 1. Comment on the old issue, pointing to the new one
+gh issue comment <OLD> --repo CherryHQ/cherry-studio --body "Tracked in #<NEW> — the new requirement fully covers the pain reported here. Closing as superseded; please follow #<NEW> for progress, and reopen this if you feel anything is missing."
+
+# 2. Close it as not-planned (since it's superseded, not literally completed by code)
+gh issue close <OLD> --repo CherryHQ/cherry-studio --reason "not planned"
+```
+
+Notes:
+
+- Use `--reason "not planned"` — `completed` implies code shipped, which isn't true yet at this point. `not planned` (with a clear comment) reads correctly as "we're tracking this elsewhere now".
+- The comment should always be posted **before** the close, so subscribers to the old issue see context in their notifications, not just a silent close.
+- The new issue's `Related` line should still list these old issue numbers — the link in both directions makes it findable from either end.
+- If the user explicitly asked to keep an old thread open (e.g., active discussion), respect that and skip the close even if the PRD subsumes it. Step 6 should have already settled this.
+
+After this step, output a one-liner:
+
+> "Created #<NEW>, added to Project #3, closed #<OLD1> #<OLD2> as superseded."
+
+### 9. Reuse path (when duplicate exists)
 
 ```bash
 gh issue edit <number> --repo CherryHQ/cherry-studio \
@@ -258,6 +339,17 @@ The original body content is overwritten — comments stay since `--body` only r
 
 **User input (raw)**:
 > "我想加一个跨会话的 memory，让 AI 在不同对话间记住用户的偏好。现有 memory 只在单次会话内有效。优先级 P0，V2 之后马上做。相关 issue 我没有，你帮我看看。"
+
+**Research findings posted to user before drafting** (Step 2D):
+
+> 我搜了一下,先把背景同步给你:
+> - **相关 open issues**: #6388 (现有 single-session Memory 的设计 issue)、#11420 (用户反馈:"AI 老是忘记我说过的事"，47 reactions)、#12057 (要求 export memory 的 issue,作为参考)。
+> - **PR 历史**: #10832 在 2024-10 尝试过类似的 cross-session 持久化，被 close 了 — comments 里说当时 RAG pipeline 还不稳定，担心检索噪音污染回答。这个约束今天还存在吗值得留意。
+> - **代码现状**: Memory 当前实现在 `packages/memory/`，只有 in-conversation context window，没有持久层；`packages/aiCore/` 里已经接好了 vector store 抽象，可以复用。
+>
+> 按这个画面起草,还是哪里我搞错了?
+
+(用户确认后,进入起草。)
 
 **Bilingual draft shown to user**:
 
