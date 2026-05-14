@@ -298,12 +298,12 @@ Priority for label selection:
    ```
 
 **Known repo conventions**:
-- `<OWNER>/<REPO>` (public): uses legacy `BUG`/`feature`/`P1`-`P3`, do NOT create `type:*`.
-- `<OWNER>/<REPO>`: currently uses `bug` / `feature` (see #135). Check `gh label list` before creating `type:*`.
+- `<REPO_A>` (public desktop client): uses legacy `BUG`/`feature`/`P1`-`P3`, do NOT create `type:*`.
+- `<REPO_B>` (private SaaS API): currently uses `bug` / `feature` (see #135). Check `gh label list` before creating `type:*`.
 
 **Priority labels** (optional):
-- <OWNER> has existing `P1` / `P2` / `P3` labels. Bitable P0/P1/P2 map to P1/P2/P3 or add `P0` separately.
-- <REPO> currently has no priority labels; check `gh label list` before creating.
+- `<REPO_A>` has existing `P1` / `P2` / `P3` labels. Bitable P0/P1/P2 map to P1/P2/P3 or add `P0` separately.
+- `<REPO_B>` currently has no priority labels; check `gh label list` before creating.
 
 ### 6.5 Backfill Issue URL to Bitable
 
