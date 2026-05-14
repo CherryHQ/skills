@@ -5,8 +5,6 @@ A shared skills repository for AI-assisted workflows. Not tied to any single pro
 > 👐 **Everyone is welcome to contribute skills they've refined.**
 > A good skill = one person figures out the workflow + the whole team saves time forever.
 
-Skills follow the [Agent Skills specification](https://agentskills.io/specification).
-
 ---
 
 ## Quick Start
@@ -84,7 +82,7 @@ description: A clear description of what this skill does and when to use it.
 - Guideline 2
 ```
 
-For complex skills, see the [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) eval-and-iterate workflow.
+For complex skills, use the eval-and-iterate workflow: draft → test against real tasks → refine description and instructions → repeat until the skill triggers correctly and produces consistent output.
 
 ### Skill Structure
 
@@ -155,6 +153,4 @@ This repository is licensed under [Apache 2.0](LICENSE).
 
 ---
 
-## Acknowledgments
-
-The [Agent Skills specification](https://agentskills.io/specification) defines the open standard.
+*End of README*
