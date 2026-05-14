@@ -1,8 +1,8 @@
 # Cherry Studio Skills
 
-These are the workflows the Cherry Studio team runs daily. We package them as skills so our AI agents handle the repetitive work — browser testing, cross-system bug tracking, bilingual PRD drafting, content production, expense processing.
+These are the workflows the Cherry Studio team runs every day. We package them as skills so our AI agents handle the boring stuff — browser testing, filing bugs across two systems, drafting bilingual PRDs, turning transcripts into content, processing expenses.
 
-This repo contains the subset we've open-sourced. We use more internally, and we'll keep releasing the ones that generalize well.
+We're sharing the ones we've cleaned up enough to be useful outside our walls. Some of our internal skills are too tied to private tools to be worth open-sourcing, but we'll keep adding the ones that aren't.
 
 ---
 
