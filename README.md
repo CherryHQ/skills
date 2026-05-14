@@ -1,11 +1,11 @@
-# Cherry Studio Skills
+# Skills
 
-A shared Claude Code skills repository for the Cherry Studio team and community. Not tied to any single product line — Cherry Studio desktop client, Cherry Studio Enterprise, internal tools, day-to-day workflows. If a workflow can be packaged as a skill, it belongs here.
+A shared skills repository for AI-assisted workflows. Not tied to any single product or team — if a workflow can be packaged as a skill, it belongs here.
 
 > 👐 **Everyone is welcome to contribute skills they've refined.**
 > A good skill = one person figures out the workflow + the whole team saves time forever.
 
-Structure follows the [Agent Skills specification](https://agentskills.io/specification) by [anthropics/skills](https://github.com/anthropics/skills).
+Skills follow the [Agent Skills specification](https://agentskills.io/specification).
 
 ---
 
@@ -15,7 +15,7 @@ Structure follows the [Agent Skills specification](https://agentskills.io/specif
 
 ```bash
 /plugin marketplace add CherryHQ/skills
-/plugin install cherry-studio-skills@CherryHQ/skills
+/plugin install all-skills@CherryHQ/skills
 ```
 
 Or install individual skill groups:
@@ -84,7 +84,7 @@ description: A clear description of what this skill does and when to use it.
 - Guideline 2
 ```
 
-For complex skills, see [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) from Anthropic for the full eval-and-iterate workflow.
+For complex skills, see the [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) eval-and-iterate workflow.
 
 ### Skill Structure
 
@@ -151,10 +151,10 @@ skills/<name>/
 
 This repository is licensed under [Apache 2.0](LICENSE).
 
-**Note**: Some skills reference internal tools, tokens, or URLs. These are documented for the Cherry Studio team. External contributors can adapt the patterns to their own infrastructure.
+**Note**: Some skills reference internal tools, tokens, or URLs. These are documented for the team that authored them. External contributors can adapt the patterns to their own infrastructure.
 
 ---
 
 ## Acknowledgments
 
-Skill structure and conventions inspired by [anthropics/skills](https://github.com/anthropics/skills). The [Agent Skills specification](https://agentskills.io/specification) defines the open standard.
+The [Agent Skills specification](https://agentskills.io/specification) defines the open standard.
