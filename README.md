@@ -2,7 +2,7 @@
 
 These are the workflows the Cherry Studio team runs every day. We package them as skills so our AI agents handle the boring stuff — browser testing, filing bugs across two systems, drafting bilingual PRDs, turning transcripts into content, processing expenses.
 
-We're sharing the ones we've cleaned up enough to be useful outside our walls. Some of our internal skills are too tied to private tools to be worth open-sourcing, but we'll keep adding the ones that aren't.
+We're sharing the ones we've cleaned up enough to be useful outside our walls. We'll keep adding more as we make them shareable.
 
 ---
 
