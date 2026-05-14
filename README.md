@@ -1,6 +1,6 @@
 # Cherry Studio Skills
 
-These are the workflows the Cherry Studio team runs every day. We package them as skills so our AI agents handle the boring stuff — browser testing, filing bugs across two systems, drafting bilingual PRDs, turning transcripts into content, processing expenses.
+These are the workflows the Cherry Studio team runs every day. We package them as skills so our AI agents handle the boring stuff — browser testing, filing bugs across two systems, drafting PRDs, turning transcripts into content, processing expenses.
 
 We're sharing the ones we've cleaned up enough to be useful outside our walls. We'll keep adding more as we make them shareable.
 
