@@ -1,0 +1,53 @@
+{
+  "name": "cherry-studio-skills",
+  "owner": {
+    "name": "Cherry Studio Team",
+    "email": "dev@cherry-ai.com"
+  },
+  "metadata": {
+    "description": "Cherry Studio shared skills for testing, content creation, product development, and operations",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "testing-skills",
+      "description": "Skills for manual testing, bug filing, and quality assurance workflows",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/test-and-report"
+      ]
+    },
+    {
+      "name": "content-skills",
+      "description": "Skills for content creation: PRD drafting, transcript-to-content, writing assistance",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/prd-creator",
+        "./skills/transcript-to-content"
+      ]
+    },
+    {
+      "name": "operations-skills",
+      "description": "Skills for operations workflows: expense reimbursement, reporting, automation",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/expense-reimbursement"
+      ]
+    },
+    {
+      "name": "all-skills",
+      "description": "All Cherry Studio skills in one plugin",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/test-and-report",
+        "./skills/prd-creator",
+        "./skills/transcript-to-content",
+        "./skills/expense-reimbursement"
+      ]
+    }
+  ]
+}

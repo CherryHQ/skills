@@ -33,10 +33,10 @@ Provide a transcript — style is auto-loaded from your saved profile:
 
 ### First-time setup: Save your style
 
-Provide 2-5 reference posts and tell Claude "保存风格":
+Provide 2-5 reference posts and tell Claude "save my style":
 
 ```
-保存风格
+save my style
 
 [paste 2-5 of your published posts here]
 ```
@@ -46,9 +46,9 @@ Claude will analyze and save your style profile. All future runs auto-load it.
 ### Multiple style profiles
 
 ```
-保存为 formal 风格    # Save a named profile
-用 formal 风格        # Use a specific profile
-更新风格              # Update default profile with new references
+save as formal style    # Save a named profile
+use formal style        # Use a specific profile
+update my style              # Update default profile with new references
 ```
 
 ## File Structure

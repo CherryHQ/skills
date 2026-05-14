@@ -1,6 +1,6 @@
 ---
 name: prd-creator
-description: Discuss a Cherry Studio community-edition product requirement with the user, draft a bilingual (Chinese + English) PRD for review, then — after explicit user approval — create the English-only issue on GitHub (CherryHQ/cherry-studio). Use whenever the user wants to turn a requirement (from a Feishu doc, a meeting note, a customer ask, or a rough idea) into a GitHub issue. Triggers on phrases like "建需求单", "create a requirement", "把这个需求建到 GitHub", "新建 feature issue", "draft an issue for...", or anytime the user describes a Cherry Studio feature/improvement they want tracked. The format is opinionated (Background / Goal / Spec / Verification / Related, NO implementation details, draft shown bilingually for human review, issue itself written in English only).
+description: Discuss a Cherry Studio community-edition product requirement with the user, draft a bilingual (Chinese + English) PRD for review, then — after explicit user approval — create the English-only issue on GitHub (CherryHQ/cherry-studio). Use whenever the user wants to turn a requirement (from a Feishu doc, a meeting note, a customer ask, or a rough idea) into a GitHub issue. Triggers on phrases like "create requirement doc", "create a requirement", "put this requirement on GitHub", "create new feature issue", "draft an issue for...", or anytime the user describes a Cherry Studio feature/improvement they want tracked. The format is opinionated (Background / Goal / Spec / Verification / Related, NO implementation details, draft shown bilingually for human review, issue itself written in English only).
 ---
 
 # Cherry Studio Requirement Issue (PRD)
@@ -64,58 +64,58 @@ When showing the user a draft, use this layout. English is the source of truth (
 
 ```markdown
 **Title (英)**: [Feature]: ...
-**标题（中）**: ...
+**Title (Chinese)**: ...
 
 ---
 
-### Background / 背景
+### Background / 背景 (Background)
 
 **EN:**
 > ...
 
-**中:**
+**ZH:**
 > ...
 
-### Goal / 目标
+### Goal / 目标 (Goal)
 
 **EN:**
 > ...
 
-**中:**
+**ZH:**
 > ...
 
-### Spec / 具体逻辑
+### Spec / 具体逻辑 (Spec)
 
 **EN:**
 > - bullet 1
 > - bullet 2
 
-**中:**
-> - 条目 1
-> - 条目 2
+**ZH:**
+> - Item 1
+> - Item 2
 
-### Verification / 验证
+### Verification / 验证 (Verification)
 
 **EN:**
 > - case 1
 
-**中:**
-> - 案例 1
+**ZH:**
+> - Case 1
 
-### Related / 相关
+### Related / 相关 (Related)
 
 #1234 #5678
 ```
 
-End every draft with: **"确认这版就建到 GitHub。要改哪一句？"** (or English equivalent if the user is using English).
+End every draft with: **"Confirm this version goes to GitHub. Which sentence needs changing?"** (or English equivalent if the user is using English).
 
 ## Workflow
 
 ### 1. Discuss & gather input
 
 If the user opens with a vague requirement, ask up to 3 clarifying questions before drafting. Useful questions:
-- 背景细节：什么样的用户在什么场景下会遇到这个问题？
-- 范围：这个需求是只覆盖 X，还是也包括 Y？
+- Background details: What kind of user encounters this problem in what scenario?
+- Scope: Does this requirement cover X only, or Y as well?
 - 关联反馈：有哪些 social feedback / GitHub issue 是这个需求的来源？(if not provided, offer to search via `gh issue list --search`)
 - Priority / Milestone — these go into Project #3 fields, NOT the issue body, but record them for later.
 
@@ -131,7 +131,7 @@ Cherry issues are bilingual, so search both languages:
 
 ```bash
 gh search issues "<EN keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
-gh search issues "<中文关键词>" --repo CherryHQ/cherry-studio --state all --limit 20
+gh search issues "<Chinese keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
 ```
 
 Also check Project #3:
@@ -230,7 +230,7 @@ Trigger questions to ask the user when appropriate:
 
 Don't blindly carry old sections forward when the framing shifts. The OpenAI/Anthropic interop PRD went through exactly this — Background was sharpened (Agent unlock as primary pain), and Goal/Spec/Verification all needed re-pivoting to match.
 
-Loop until explicit confirmation ("确认 / OK / 建吧 / yes ship it"). Don't auto-create on a single "looks good" — wait for an unambiguous "build it" signal.
+Loop until explicit confirmation ("confirm / OK / ship it / yes ship it"). Don't auto-create on a single "looks good" — wait for an unambiguous "build it" signal.
 
 ### 6. Re-validate Related links before submit
 
@@ -355,27 +355,27 @@ The original body content is overwritten — comments stay since `--body` only r
 
 ```markdown
 **Title (英)**: [Feature]: Cross-session Memory
-**标题（中）**: 跨会话 Memory
+**Title (Chinese)**: Cross-session Memory
 
 ---
 
-### Background / 背景
+### Background / 背景 (Background)
 
 **EN:**
 > Cherry Studio's existing Memory feature only retains information within a single conversation. Users who switch topics or start new sessions lose context they've shared (preferences, ongoing project details, recurring facts), forcing them to re-explain themselves repeatedly.
 
-**中:**
-> Cherry Studio 现有的 Memory 只在单次会话内保留信息。用户切换话题或新建会话后，之前分享的偏好、项目细节、长期事实都会丢失，导致用户反复重述。
+**ZH:**
+> Cherry Studio's existing Memory only retains information within a single session. When users switch topics or start new sessions, previously shared preferences, project details, and long-term facts are lost, forcing users to repeat themselves.
 
-### Goal / 目标
+### Goal / 目标 (Goal)
 
 **EN:**
 > Users can persist memory across all conversations, so the AI naturally remembers preferences, facts, and context regardless of which topic the user is in.
 
-**中:**
-> 用户可以让记忆跨所有对话持久化，AI 在任何话题下都能记住偏好、事实、上下文。
+**ZH:**
+> Users can persist memory across all conversations, so the AI remembers preferences, facts, and context regardless of topic.
 
-### Spec / 具体逻辑
+### Spec / 具体逻辑 (Spec)
 
 **EN:**
 > - Users can explicitly mark information to be remembered across sessions, surfaced in the conversation when the AI commits it to long-term memory.
@@ -383,25 +383,25 @@ The original body content is overwritten — comments stay since `--body` only r
 > - Users can view, edit, and delete cross-session memory entries from a dedicated settings panel.
 > - Cross-session memory persists across app restarts.
 
-**中:**
-> - 用户可以明确标记某些信息要跨会话记住，AI 写入长期记忆时在对话中明示。
-> - 任何新对话里，AI 自动检索相关的跨会话记忆并融入回答。
-> - 用户可在专门的设置面板查看、编辑、删除跨会话记忆条目。
-> - 跨会话记忆在 app 重启后依然保留。
+**ZH:**
+> - Users can explicitly mark information to remember across sessions, with the AI indicating in conversation when it commits to long-term memory.
+> - In any new conversation, the AI automatically retrieves relevant cross-session memory and incorporates it into responses.
+> - Users can view, edit, and delete cross-session memory entries from a dedicated settings panel.
+> - Cross-session memory persists across app restarts.
 
-### Verification / 验证
+### Verification / 验证 (Verification)
 
 **EN:**
 > - In conversation A, user says "I'm a data scientist, I mainly use Python." Start conversation B and ask "recommend me learning resources" — response should target data science / Python without re-asking the user's role.
 > - User toggles cross-session memory off in settings → new conversations show no retrieved memory entries and behave like a clean session.
 > - Conflicting statements: in conversation A say "I use Python", later say "I use Go" — subsequent conversations should reflect the most recent statement, not both.
 
-**中:**
-> - 对话 A 里用户说"我是数据科学家，主要用 Python"。新建对话 B 问"推荐学习资源"——回答应针对数据科学/Python，不再问用户角色。
-> - 用户在设置里关闭跨会话记忆 → 新对话不应检索到任何旧条目，行为如全新会话。
-> - 冲突陈述：对话 A 说"我用 Python"，后来说"我用 Go"——后续对话应使用最新陈述，不应同时引用两者。
+**ZH:**
+> - In conversation A, user says "I am a data scientist, mainly use Python". New conversation B asks "recommend learning resources" — response should target data science/Python without re-asking user role.
+> - User toggles cross-session memory off in settings → new conversations show no retrieved memory entries and behave like a clean session.
+> - Conflicting statements: conversation A says "I use Python", later says "I use Go" — subsequent conversations should reflect the most recent statement, not both.
 
-### Related / 相关
+### Related / 相关 (Related)
 
 #6388 (existing single-session Memory)
 ```

@@ -251,19 +251,19 @@ Call once per image.
 <details>
 <summary>Original Chinese Content</summary>
 
-### 现象
+### Phenomenon
 ...
 
-### 根因
+### Root Cause
 ...
 
-### 建议修复
+### Proposed Fix
 ...
 
-### 不在本 issue 范围
+### Out of Scope
 ...
 
-### 复现方式
+### Reproduction
 ...
 
 </details>

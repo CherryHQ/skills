@@ -1,49 +1,33 @@
 # Cherry Studio Skills
 
-A shared Claude Code skills repository for the Cherry Studio team. Not tied to any single product line — Cherry Studio desktop client, Cherry Studio Enterprise, internal tools, day-to-day workflows. If a workflow can be packaged as a skill, it belongs here.
+A shared Claude Code skills repository for the Cherry Studio team and community. Not tied to any single product line — Cherry Studio desktop client, Cherry Studio Enterprise, internal tools, day-to-day workflows. If a workflow can be packaged as a skill, it belongs here.
 
 > 👐 **Everyone is welcome to contribute skills they've refined.**
-> A good skill = one person figures out the workflow + the whole team saves time forever. Everything from "write my weekly report" and "polish copy" to "system testing collaboration" and "code review" is worth capturing.
+> A good skill = one person figures out the workflow + the whole team saves time forever.
 
-Structure follows [anthropics/skills](https://github.com/anthropics/skills).
-
----
-
-## Current Skills
-
-| Skill | Purpose | Typical Triggers |
-|-------|---------|------------------|
-| [test-and-report](skills/test-and-report/) | Accompany users through manual staging testing, file bugs to a Feishu Bitable + GitHub issue dual-track system | `test and report` / `start system testing` / `help me test cherry / express saas` / paste Feishu test doc + bitable |
-| [prd-creator](skills/prd-creator/) | Discuss a Cherry Studio community-edition requirement with PM → produce a bilingual PRD review → after user confirmation, create the English GitHub issue (CherryHQ/cherry-studio) + auto-add to Project #3 + set fields | `create requirement` / `draft an issue` / `new feature issue` / `draft an issue for...` |
-| [transcript-to-content](skills/transcript-to-content/) | Turn transcripts, meeting recordings, or raw notes into publishable content: multiple social posts or a single long-form article. Auto-verifies proper nouns, numbers, and ASR errors; long articles use an index-retrieval strategy to prevent hallucination | `write an article` / `turn this talk into a blog post` / `write up this session` / `convert transcript` |
-| [expense-reimbursement](skills/expense-reimbursement/) | Full lifecycle expense reimbursement: single invoice intake, batch aggregation, approval workflow, ledger and dashboard | `expense` / `invoice` / `reimbursement` / `submit expense` |
-
-_(Keep adding to this table.)_
+Structure follows the [Agent Skills specification](https://agentskills.io/specification) by [anthropics/skills](https://github.com/anthropics/skills).
 
 ---
 
-## Use Cases
+## Quick Start
 
-| Scenario | Examples |
-|----------|----------|
-| Product workflows | Client / SaaS testing, releases, PR review, doc collaboration |
-| Engineering workflows | Issue triage, PRD writing, code review, release notes generation |
-| Ops / Marketing / PM | Weekly reports, meeting notes, WeChat post formatting, Feishu group notifications |
-| Daily office work | Email drafting, schedule organizing, Feishu Bitable automation |
-| Onboarding | Environment setup guides, internal repo access requests, knowledge-base indexing |
-
-If you do it repeatedly and it's slightly painful every time, it's a skill candidate.
-
----
-
-## Installation (pick one)
-
-### Option 1: Symlink a single skill (recommended)
-
-Lightweight. Clone the repo, then symlink the skill you want into `~/.claude/skills/`:
+### Install via Claude Code Plugin
 
 ```bash
-cd ~/code  # wherever you keep code
+/plugin marketplace add CherryHQ/skills
+/plugin install cherry-studio-skills@CherryHQ/skills
+```
+
+Or install individual skill groups:
+```bash
+/plugin install testing-skills@CherryHQ/skills
+/plugin install content-skills@CherryHQ/skills
+```
+
+### Manual Install (symlink)
+
+```bash
+cd ~/code
 git clone git@github.com:CherryHQ/skills.git
 cd skills
 
@@ -51,25 +35,104 @@ cd skills
 ln -s "$(pwd)/skills/test-and-report" ~/.claude/skills/test-and-report
 ```
 
-Updates come through `git pull`.
+### Using in Claude.ai / API
 
-### Option 2: Symlink all skills
+Upload the skill folder directly. See [Using skills in Claude](https://support.claude.com/en/articles/12512180-using-skills-in-claude).
 
-```bash
-cd ~/code/skills
-for skill in skills/*/; do
-  name=$(basename "$skill")
-  ln -sfn "$(pwd)/$skill" ~/.claude/skills/"$name"
-done
+---
+
+## Skill Catalog
+
+### 🧪 Testing & Quality
+| Skill | Purpose | Triggers |
+|-------|---------|----------|
+| [test-and-report](skills/test-and-report/) | Manual staging testing + dual-track bug filing (Feishu Bitable + GitHub) | `test and report` / `start testing` / `staging review` / `file a bug` |
+
+### 📝 Product & Content
+| Skill | Purpose | Triggers |
+|-------|---------|----------|
+| [prd-creator](skills/prd-creator/) | Bilingual PRD drafting → English GitHub issue creation with Project #3 integration | `create requirement` / `draft an issue` / `new feature issue` |
+| [transcript-to-content](skills/transcript-to-content/) | Transcripts → social posts or long-form articles. Style learning, fact-checking, ASR correction | `write an article` / `turn this talk into a blog post` / `convert transcript` |
+
+### 💼 Operations
+| Skill | Purpose | Triggers |
+|-------|---------|----------|
+| [expense-reimbursement](skills/expense-reimbursement/) | Full lifecycle: invoice intake → batch aggregation → approval → ledger & dashboard | `expense` / `invoice` / `reimbursement` / `submit expense` |
+
+---
+
+## Creating a Skill
+
+Use the [template](template/SKILL.md) as a starting point:
+
+```markdown
+---
+name: my-skill-name
+description: A clear description of what this skill does and when to use it.
+---
+
+# My Skill Name
+
+[Instructions that Claude follows when this skill is active]
+
+## Examples
+- Example usage 1
+- Example usage 2
+
+## Guidelines
+- Guideline 1
+- Guideline 2
 ```
 
-### Option 3: Copy (no auto-updates)
+For complex skills, see [skill-creator](https://github.com/anthropics/skills/tree/main/skills/skill-creator) from Anthropic for the full eval-and-iterate workflow.
 
-```bash
-cp -R skills/test-and-report ~/.claude/skills/
+### Skill Structure
+
+```
+skills/<name>/
+├── SKILL.md              # Required. YAML frontmatter + instructions
+├── README.md             # Optional. Human-readable overview
+├── references/           # Optional. Long procedures, configs, standards
+│   └── *.md
+├── scripts/              # Optional. Executable helpers
+│   └── *.py
+├── agents/               # Optional. Sub-agent definitions for complex workflows
+│   └── *.md
+├── evals/                # Optional. Test cases
+│   └── *.json
+└── assets/               # Optional. Templates, images, icons
+    └── *
 ```
 
-After installation, invoke the skill in Claude Code / Conductor using its trigger phrases.
+### Frontmatter Requirements
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | ✅ | Unique kebab-case identifier |
+| `description` | ✅ | When to trigger + what it does. This is the primary triggering mechanism — include both positive triggers ("use when...") and negative triggers ("do NOT use when...") |
+
+### Tips
+
+- **Description is everything**: Claude decides whether to load your skill based solely on the `description` field. Be specific about trigger contexts.
+- **Keep SKILL.md under 500 lines**: Long content goes into `references/`, linked from SKILL.md.
+- **When to use / when NOT to use**: Negative trigger lists prevent false activations.
+- **Include worked examples**: A concrete example prevents more misinvocations than pages of abstract rules.
+- **Version your references**: If a skill has persistent state (like style profiles), document the storage format.
+
+---
+
+## Contributing
+
+1. Prototype locally in `~/.claude/skills/<name>/`
+2. Copy to `skills/<name>/` in this repo
+3. Add to the Skill Catalog table in this README (pick the right category)
+4. Open a PR
+
+### Naming Conventions
+
+- Directory names: `kebab-case`, verb-first (`test-and-report`, `doc-review`, `wechat-crm`)
+- PRs go through review, merges use squash
+- Breaking changes: write a CHANGELOG entry; if trigger phrases change, flag in PR description
 
 ---
 
@@ -77,48 +140,21 @@ After installation, invoke the skill in Claude Code / Conductor using its trigge
 
 | Capability | Check | If Missing |
 |------------|-------|------------|
-| `lark-cli` | `lark-cli contact +get-user` returns current user | Follow internal onboarding docs for `lark-shared` auth |
-| `gh` CLI | `gh auth status` shows logged in with write access to target repos | `gh auth login` + ask org admin to add you to repos |
-| `upload-img` (Cloudflare R2 image hosting) | `which upload-img` returns `~/.local/bin/upload-img` | Ask internal ops for the script, or use manual upload as fallback |
-| `claude-in-chrome` extension (for testing / browser skills) | Claude icon visible in Chrome menu and shows "Connected" | Install from [claude.com/chrome](https://claude.com/chrome) |
+| `lark-cli` | `lark-cli contact +get-user` returns current user | Follow internal onboarding docs |
+| `gh` CLI | `gh auth status` shows logged in with write access | `gh auth login` + ask org admin |
+| `upload-img` (Cloudflare R2) | `which upload-img` returns `~/.local/bin/upload-img` | Ask internal ops for the script |
+| `claude-in-chrome` extension | Claude icon visible in Chrome, "Connected" | Install from [claude.com/chrome](https://claude.com/chrome) |
 
 ---
 
-## Adding a New Skill (PRs welcome ❤️)
+## License
 
-1. **Prototype locally first** — build it in `~/.claude/skills/<name>/`, iterate until it works smoothly
-2. **Drop it in `skills/<name>/`** — directory name must match the `name` in SKILL.md frontmatter
-3. **Must include `SKILL.md`** with YAML frontmatter containing `name` + `description` (description is the core of trigger logic)
-4. **Optional**: `references/` (long procedures / configs), `scripts/` (executables), `assets/` (templates / icons)
-5. **Add a row to the "Current Skills" table** in this README
-6. Open a PR
+This repository is licensed under [Apache 2.0](LICENSE).
 
-**Tips** (fewer surprises):
-- Use Anthropic's `skill-creator` skill to draft + optimize descriptions — trigger accuracy improves significantly
-- Keep SKILL.md under 500 lines; long content goes into `references/`, linked from SKILL.md
-- Write clearly "**when to use**" and "**when NOT to use**" in the description (negative lists prevent false triggers)
-- If a skill references base_tokens / private repo names / internal URLs, be mindful of confidentiality (this repo is private, but don't copy to public repos)
-
-**Not sure what to build?** High-value directions:
-- Package any workflow you've done 5+ times manually (weekly reports, schema changes, email replies)
-- Turn team FAQs of "how do I do X" into callable skills
-- Wrap an external CLI / API with a convenience layer
+**Note**: Some skills reference internal tools, tokens, or URLs. These are documented for the Cherry Studio team. External contributors can adapt the patterns to their own infrastructure.
 
 ---
 
-## Collaboration Conventions
+## Acknowledgments
 
-- **Naming**: kebab-case, verb-first (`test-and-report`, `doc-review`, `wechat-crm`)
-- **Changes**: PRs go through review, merges use squash
-- **Deprecation**: Mark unused skills with `[DEPRECATED]` in their description rather than deleting — gives teammates time to adjust
-- **Breaking changes**: Write a CHANGELOG entry; if trigger phrases change, flag it in the PR description
-
----
-
-## Confidentiality Notice
-
-This is an **internal / private** repository. Skills may contain staging tokens, internal repo names, customer data schemas, account open_ids, and other sensitive information.
-
-- ❌ Do NOT copy skills to public repositories
-- ❌ Do NOT quote skill configuration blocks verbatim on public channels (X / WeChat / blogs)
-- ✅ Sharing, discussing, and learning from skills inside the company is encouraged
+Skill structure and conventions inspired by [anthropics/skills](https://github.com/anthropics/skills). The [Agent Skills specification](https://agentskills.io/specification) defines the open standard.

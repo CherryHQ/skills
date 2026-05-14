@@ -46,7 +46,7 @@ Perform the following checks on all records:
 |-------|-------------------|
 | **Duplicate reimbursement** | Invoice number duplicates across all personal Base records (using "Invoice Number Duplicate Check" formula field or local comparison) |
 | **Completeness** | Required fields missing (Date, Amount, Type, Description) |
-| **Amount合理性** | Single item amount abnormally high (exceeds 3× same-type average) |
+| **Amount Reasonableness** | Single item amount abnormally high (exceeds 3× same-type average) |
 
 Generate a **validation report**, listing each issue with severity (⚠️ Warning / ❌ Blocker) and explanation.
 

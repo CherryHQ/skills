@@ -118,7 +118,7 @@ If user provides budget data, calculate execution rate:
 Auto-flag anomalies:
 - Over-budget types or departments
 - Abnormally high single expenses (exceed 3× same-type average)
-- Abnormal reimbursement frequency (employee密集报销 within short period)
+- Abnormal reimbursement frequency (employee密集reimbursement within short period)
 - Overlong approval cycle (time from "Pending Approval" to "Approved")
 - Duplicate invoice numbers (using Base "Invoice Number Duplicate Check" formula field)
 

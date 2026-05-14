@@ -1,6 +1,6 @@
 ---
 name: transcript-to-content
-description: Transform transcripts, conversations, or raw notes into shareable content — either multiple social posts OR a single long-form article. Learns style from user's published content. Handles transcripts of any length (tested up to 5500+ lines / 90+ min). Use when user: (1) provides transcript/conversation/recording and wants social content, (2) asks to "turn recording/notes into posts", (3) mentions generating content from recordings/notes, (4) needs multiple publishable pieces from single source, (5) asks to write an article from a transcript — e.g. "写成文章/长文", "整理成一篇文章", "write up this session", "turn this talk into a blog post", "深度文章". Social mode outputs 2-15 ready-to-publish pieces. Article mode outputs a structured long-form piece (3000-10000+ chars) written section-by-section.
+description: Transform transcripts, conversations, or raw notes into shareable content — either multiple social posts OR a single long-form article. Learns style from user's published content. Handles transcripts of any length (tested up to 5500+ lines / 90+ min). Use when user: (1) provides transcript/conversation/recording and wants social content, (2) asks to "turn recording/notes into posts", (3) mentions generating content from recordings/notes, (4) needs multiple publishable pieces from single source, (5) asks to write an article from a transcript — e.g. "write an article/long-form", "organize into an article", "write up this session", "turn this talk into a blog post", "deep dive". Social mode outputs 2-15 ready-to-publish pieces. Article mode outputs a structured long-form piece (3000-10000+ chars) written section-by-section.
 ---
 
 # Transcript to Content Generator
@@ -11,7 +11,7 @@ Transform raw content (transcripts, conversations, notes) into ready-to-publish 
 
 Before doing anything else, decide which mode to use:
 
-- **Article Mode** — if user says "写成文章/长文/article/write up/blog post", OR the transcript is a structured talk/sharing/interview with a clear narrative arc. Jump to [Long-form Article Mode](#long-form-article-mode).
+- **Article Mode** — if user says "write an article / long-form / article / write up / blog post", OR the transcript is a structured talk/sharing/interview with a clear narrative arc. Jump to [Long-form Article Mode](#long-form-article-mode).
 - **Social Post Mode** — for everything else (extracting multiple standalone posts). Continue with Step 1 below.
 
 If unclear, ask the user: "Do you want multiple social posts, or one cohesive article?"
@@ -30,7 +30,7 @@ Accept two inputs:
 
 1. **Check for saved style profile first**: Read `style-profiles/default.md` AND `style-profiles/default-samples.md` (relative to this skill's directory). If they exist, load both silently — the summary for rules, the samples for voice and rhythm. Do NOT ask user for reference content.
 2. **User provides new reference content in this session**: Analyze it (see below) and offer to save/update the profile.
-3. **User specifies a named profile**: e.g. "用 formal 风格" → load `style-profiles/formal.md`
+3. **User specifies a named profile**: e.g. "use formal style" → load `style-profiles/formal.md`
 4. **No profile exists AND no reference provided**: Ask user: "Do you have 2-5 examples of content you've published that you like? This helps me match your style. I'll save it so you won't need to provide it again."
 5. **User declines**: Use neutral professional tone with clear structure.
 
@@ -195,7 +195,7 @@ When the transcript is a structured talk, interview, or sharing session with a c
 
 ### When to Use This Mode
 
-- User says "写成文章" / "写成长文" / "整理成一篇文章" / "turn into an article" / "write up this session"
+- User says "write an article" / "long-form article" / "turn this into an article" / "write up this session"
 - Transcript is a structured talk/sharing/interview (not casual chat)
 - Content has a clear narrative arc (why -> how -> what happened)
 
@@ -207,24 +207,24 @@ When the transcript is a structured talk, interview, or sharing session with a c
 
    **Multi-source ASR handling (CRITICAL when multiple transcripts are provided):**
 
-   当同时提供多份转录文档时（例如：原始录音转录稿 + 聊天总结），两份都可能含有 ASR 识别错误。处理原则：
+   When multiple transcript sources are provided (e.g., raw recording transcript + chat summary), both may contain ASR errors. Resolution principles:
 
-   | 来源 | 权重 | 用途 |
+   | Source | Weight | Purpose |
    |------|------|------|
-   | **用户词典** | 最高 | 专有名词、产品名、术语的唯一权威 |
-   | **两份文档互相印证** | 高 | 两份都提到的内容，可信度高 |
-   | **上下文语义逻辑** | 主要判断依据 | 某个词/说法放在上下文里是否合理 |
-   | **单一文档的独立说法** | 需核查 | 只在一份文档出现、另一份没有，需靠上下文验证 |
+   | **User Dictionary** | Highest | Authoritative source for proper nouns, product names, and terminology |
+   | **Cross-document Verification** | High | Content appearing in both sources has higher credibility |
+   | **Contextual Semantic Logic** | Primary | Whether a term makes sense in its surrounding context |
+   | **Single-document Claims** | Verify | Content appearing in only one document must be verified against context |
 
-   **不能做的事：**
-   - 不能因为是"原始转录"就自动高于"总结"——两份都是 ASR，都可能有错
-   - 不能因为总结里写了某个说法就直接采用——总结同样可能听错
-   - 不能凭大模型自身知识补充"背景信息"写入正文——只有对话里出现的内容才能进正文；模型自行补充的公司数据、行业数据等，只能进附录并标注"来源非对话"
+   **Must NOT do:**
+   - Do NOT assume raw transcript automatically outranks summary — both are ASR, both may have errors
+   - Do NOT adopt a claim just because it appears in the summary — summaries can also mishear
+   - Do NOT supplement "background info" from model knowledge into the main text — only content from the conversation belongs in the article; model-supplied company/industry data goes in appendix labeled "source: not from conversation"
 
-   **常见判断案例：**
-   - 两份都写"o1模型"但上下文语境是在讲某个开源项目 → 结合用户词典查是否有对应词条，再看上下文
-   - 总结写"OpenAI Completions API"，原文写"opengl"（明显 ASR 错误）→ 用词典 + 上下文判断实际指什么
-   - 两份均无该词条，上下文语义不通 → 标注存疑，或在附录说明
+   **Common judgment cases:**
+   - Both write "o1 model" but context is about an open-source project → check user dictionary for matching entries, then verify context
+   - Summary says "OpenAI Completions API", original says "opengl" (obvious ASR error) → use dictionary + context to determine actual meaning
+   - Neither document has the term, context makes no sense → flag as questionable or note in appendix
 
 2. **Compress into structured notes** — Write a `notes.md` file in the same directory as the article. This is the critical intermediate step that prevents quality decay in later sections. For each major topic in the transcript, capture:
    - **Core argument** (1-2 sentences)
@@ -269,31 +269,31 @@ Before writing each section, classify its source material:
 2. **Then write the section from those bullets**, pulling in specific quotes only for texture.
 3. **Grep-verify** every claim — don't trust your memory of what was said.
 
-**Oral residue self-check:** After writing a section, scan for filler words: "就是/然后/其实/可能/的话/对吧". If a single paragraph contains 3+ of these, the passage hasn't been sufficiently rewritten — it's still transcript, not article. Rewrite it.
+**Oral residue self-check:** After writing a section, scan for filler words: " fillers (e.g., 就是/然后/其实 in Chinese, like/then/actually in English) (filler words in Chinese transcripts, analogous to like/then/actually/maybe/you know/right in English)". If a single paragraph contains 3+ of these, the passage hasn't been sufficiently rewritten — it's still transcript, not article. Rewrite it.
 
 #### Phase 3: Polish
 
 - Apply user's style corrections across the full article
 - Global find-and-replace for naming conventions (e.g. real name -> nickname)
 - Remove meta-commentary fluff (see Content Principles below)
-- **Terminology normalization:** Replace jargon abbreviations with full terms (e.g. RD→研发, PM→产品经理). Align repeated terms to one consistent form throughout (e.g. if both "Web Coding" and "Vibe Coding" appear, pick the industry-standard term and use it everywhere)
-- **ASR homophone sweep (MANDATORY for transcripts):** Beyond proper nouns, scan for common ASR mishearings — homophones (市值→价值, 支出→直出), word-boundary errors (可以呀用→可以用), and phonetic transliterations of English terms (e.g. "Figma妹"→"Figma Make"). Read suspicious words in context and Grep-verify against nearby sentences
-- **De-date:** Prefer relative time references (周三, 上周, 之前) over specific calendar dates (2026年3月11日) unless the date itself is newsworthy. Specific dates age the article and add no value
+- **Terminology normalization:** Replace jargon abbreviations with full terms (e.g. RD→R\&D, PM→Product Manager). Align repeated terms to one consistent form throughout (e.g. if both "Web Coding" and "Vibe Coding" appear, pick the industry-standard term and use it everywhere)
+- **ASR homophone sweep (MANDATORY for transcripts):** Beyond proper nouns, scan for common ASR mishearings — homophones (market cap→value, spend→direct output), word-boundary errors (can ya use→can use), and phonetic transliterations of English terms (e.g. "Figma mei"→"Figma Make"). Read suspicious words in context and Grep-verify against nearby sentences
+- **De-date:** Prefer relative time references (Wednesday, last week, earlier) over specific calendar dates (March 11, 2026) unless the date itself is newsworthy. Specific dates age the article and add no value
 
 #### Phase 4: Pre-delivery QA (MANDATORY before sending to user)
 
-在发出任何版本之前，必须自己通读一遍全文，检查以下四项：
+Before delivering any version, read the entire piece and check these four items:
 
-1. **事实核查**：每一个具体的归因（"张奕麟说"、"Kenny分析"）是否和源文档对得上？有没有把某人的话错误地归到另一个人？
-2. **重复内容**：同一个故事/案例/观点有没有在多个章节重复出现？（常见：产品演进故事 → 方法论章节 → 行业洞察章节，三处都在讲同一个案例）
-3. **ASR 残留**：有没有语义不通的句子？把每段引号内的话读一遍，看是否像一个真实的人说的话
-4. **无来源内容**：有没有大模型自行补充的背景知识（公司融资数据、行业统计、产品参数）被写进了正文？有则移至附录并标注"来源非对话"
+1. **Fact check**: Does every specific attribution ("John said", "Alice\'s analysis") match the source document? Did anyone\'s words get misattributed?
+2. **Repetition**: Does the same story/case/opinion appear in multiple sections? (Common: product evolution story → methodology section → industry insight section — same case told three times)
+3. **ASR residue**: Any semantically broken sentences? Read every quoted passage to check if it sounds like something a real person would say
+4. **Unsourced content**: Did model-supplied background knowledge (company funding data, industry stats, product specs) leak into the article? If so, move to appendix and label "source: not from conversation"
 
-通读后再进行版本归档。
+After reading through, proceed to version archiving.
 
 #### Version Management (MANDATORY)
 
-**每一轮修改完成后**，把当前状态存为带版本号的文件。版本号标在文件名里，用户拿到任何文件都能从名字判断版本。
+**After each round of edits**, save the current state as a versioned file. Version numbers go in filenames so users can tell the version from the name.
 
 **Rules:**
 - Initial draft from subagents = `_v1.md`
@@ -305,7 +305,7 @@ Before writing each section, classify its source material:
 ```
 {basename}_v{N}.md
 ```
-Example: `张奕麟_Kuse深度访谈_20260321_v1.md` → `_v2.md` → `_v5.md`
+Example: `speaker_topic_20260321_v1.md` → `_v2.md` → `_v5.md`
 
 **When to create a new version (AFTER edits complete):**
 - After user's correction round is fully applied
@@ -336,25 +336,25 @@ If your outline has 8-10 major topics, you have too many first-level headings. C
 - **Middle sections** (the meaty parts) should have 2-3 ### sub-headings each
 - **If a section has only 1 sub-heading**, it doesn't need sub-headings — just write it as a single section
 
-**Heading format:** ## headings use descriptive phrases only (NO Chinese numbering like 一、二、三). ### headings use Arabic numbering (1. 2. 3.), restarting within each ## section.
+**Heading format:** ## headings use descriptive phrases only (NO Chinese numbering). ### headings use Arabic numbering (1. 2. 3.), restarting within each ## section.
 
 **Example structure:**
 ```
-## 开篇 (no sub-headings)
-## 为什么要变 (narrative arc 1)
-  ### 1. 工具进化
-  ### 2. 流程痛点
-  ### 3. 转折
-## 怎么变 (narrative arc 2)
-  ### 1. 工具选择
-  ### 2. 实战工作流
-  ### 3. 设计系统
-## 变了之后 (narrative arc 3)
-  ### 1. 协作模式
-  ### 2. 审美
-  ### 3. 角色未来
-## 行动建议 (short, no sub-headings)
-## 结语 (short, no sub-headings)
+## Introduction (no sub-headings)
+## Why Change (narrative arc 1)
+  ### 1. Tool Evolution
+  ### 2. Workflow Pain Points
+  ### 3. Turning Point
+## How to Change (narrative arc 2)
+  ### 1. Tool Selection
+  ### 2. Practical Workflow
+  ### 3. Design System
+## After the Change (narrative arc 3)
+  ### 1. Collaboration Model
+  ### 2. Aesthetic
+  ### 3. Future of Roles
+## Action Items (short, no sub-headings)
+## Conclusion (short, no sub-headings)
 ```
 
 ### Content Principles for Long-form Articles
@@ -362,9 +362,9 @@ If your outline has 8-10 major topics, you have too many first-level headings. C
 **1. Content over meta-commentary.**
 
 The article's value is the IDEAS, not who said them during the session. Remove:
-- "在分享的问答环节，一位叫XX的产品经理提了一个问题：..."
-- "我自己也在分享中补充了我的观察。"
-- "分享中有一个观众问了一个很有代表性的问题"
+- "During the Q&A session, a PM named XX asked a question: ..."
+- "I also shared my own observations during the session."
+- "A participant asked a very representative question during the session"
 
 Replace with direct content: present the question/topic directly, weave observations naturally.
 
@@ -379,7 +379,7 @@ Replace with direct content: present the question/topic directly, weave observat
 - The article has a narrator (usually the host/organizer) writing in first person
 - The main speaker's content is presented in third person with direct quotes
 - When narrator shares their own experience, use first person naturally
-- **Attribution thinning (CRITICAL):** "瑜子说/瑜子认为/她觉得" should appear at most 2-3 times per major section, NOT at every paragraph start. When the context already makes clear who is speaking, drop the attribution entirely. Bad: "瑜子认为找参考是每个设计师都可以做的事". Good: "找参考是每个设计师都可以做的事". After writing, do a sweep: if 3+ consecutive paragraphs start with speaker attribution, thin them out
+- **Attribution thinning (CRITICAL):** "Alice says/Alice thinks/she believes" should appear at most 2-3 times per major section, NOT at every paragraph start. When the context already makes clear who is speaking, drop the attribution entirely. Bad: "Alice believes finding references is something every designer can do". Good: "Finding references is something every designer can do". After writing, do a sweep: if 3+ consecutive paragraphs start with speaker attribution, thin them out
 
 **4. Direct quotes for texture.**
 
@@ -391,8 +391,8 @@ Replace with direct content: present the question/topic directly, weave observat
 **5. Tool/product descriptions — compress, don't transcribe.**
 
 - When the transcript walks through a tool or website feature-by-feature, do NOT transcribe the walkthrough. Distill to 1-2 sentences capturing the core value proposition
-- Bad: "它不仅仅只是呈现一个视觉的设计方案，它其实会有很多子功能——比如你可以去按照登录流程具体是怎么做的去查看，它会有一些框图显示出来。它还有一个叫Flows的Tab..." (transcribing the demo)
-- Good: "它不仅呈现设计方案，还可以按流程具体操作体验，甚至把关键动线元素圈出来分析设计思路。" (core value in one sentence)
+- Bad: "It doesn\'t just present a visual design, it has many sub-features — you can view the login flow step by step, with diagrams. There\'s also a Flows tab..." (transcribing the demo)
+- Good: "It presents design schemes and lets you interact with flows directly, even circling key motion elements to analyze design thinking." (core value in one sentence)
 - This applies to: tool recommendations, website intros, feature walkthroughs, skill descriptions
 
 **6. Supplementary references.**
@@ -409,7 +409,7 @@ Style profiles are saved in `style-profiles/` (relative to this skill's director
 
 ### Saving a Style Profile
 
-When user provides reference content (or says "保存风格" / "save my style"):
+When user provides reference content (or says "save my style"):
 
 1. Analyze the reference content using the style extraction dimensions from Step 1
 2. Save TWO files:
@@ -473,22 +473,22 @@ These are the user's actual published posts. Read them every time to internalize
 
 **Why both files?** The summary captures rules (paragraph length, structure, tone). But rules alone produce mechanical imitation. The samples provide the actual voice — sentence rhythm, word choices, how transitions land, specific humor or sharpness. Read both every time.
 
-3. Confirm to user: "风格档案已保存（分析总结 + 原文范例）。以后每次运行会自动加载，不用再提供参考了。"
+3. Confirm to user: "Style profile saved (analysis summary + original samples). Will auto-load on future runs — no need to provide references again."
 
 ### Updating a Profile
 
-User says "更新风格" / "update my style" + provides new reference content → overwrite both `default.md` and `default-samples.md`.
+User says "update my style" + provides new reference content → overwrite both `default.md` and `default-samples.md`.
 
 ### Multiple Profiles
 
 User can maintain multiple profiles:
-- "保存为 formal 风格" → saves to `style-profiles/formal.md` + `formal-samples.md`
-- "用 formal 风格" → loads `style-profiles/formal.md` + `formal-samples.md` instead of default
-- "切换风格" / "switch style" → list available profiles and let user choose
+- "Save as formal style" → saves to `style-profiles/formal.md` + `formal-samples.md`
+- "Use formal style" → loads `style-profiles/formal.md` + `formal-samples.md` instead of default
+- "Switch style" → list available profiles and let user choose
 
 ### Deleting a Profile
 
-User says "删除风格" / "reset my style" → delete the profile file, revert to asking for references.
+User says "reset my style" → delete the profile file, revert to asking for references.
 
 ---
 

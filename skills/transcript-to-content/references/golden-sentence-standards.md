@@ -45,7 +45,7 @@ For each potential insight, ask:
 ### ❌ Mistake 3: Requires Industry Background
 
 **Bad Example:**
-> "CapCut is still纠结 whether to be a tool or a community"
+> "CapCut is stillagonizing whether to be a tool or a community"
 
 **Problem:** Why is this a dilemma? What's the impact?
 

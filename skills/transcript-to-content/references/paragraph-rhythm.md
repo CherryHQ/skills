@@ -121,4 +121,4 @@ After completing a piece (social post or article section), do a rhythm scan:
 
 ## Data Source
 
-These guidelines are derived from analyzing high-readability WeChat articles (e.g., 42章经 / 42 Chapters), where the average paragraph is ~35 chars, 65% of paragraphs are under 40 chars, and no paragraph exceeds 120 chars. The core insight: mobile readers need frequent visual breaks — paragraph boundaries serve as breathing points.
+These guidelines are derived from analyzing high-readability WeChat articles (e.g., 42 Chapters / 42 Chapters), where the average paragraph is ~35 chars, 65% of paragraphs are under 40 chars, and no paragraph exceeds 120 chars. The core insight: mobile readers need frequent visual breaks — paragraph boundaries serve as breathing points.
