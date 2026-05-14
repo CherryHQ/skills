@@ -1,165 +1,165 @@
-# 台账与看板
+# Ledger & Dashboard
 
-用户使用本文件的场景：报销审批完成后，生成台账记录、汇总统计、看板报表，或进行历史数据分析。
-
----
-
-## 目标
-
-从个人报销 Base 读取已完成的报销记录（审批状态为"已通过"或"已打款"），生成会计台账、汇总看板和预算对比分析。
+User scenario for this file: after reimbursement approval is complete, generate ledger records, summary statistics, dashboard reports, or historical data analysis.
 
 ---
 
-## 工作流
+## Goal
 
-### 阶段 1 — 数据准备
+Read completed reimbursement records from personal reimbursement Base (approval status "Approved" or "Paid"), generate accounting ledger, summary dashboard, and budget-vs-actual analysis.
 
-**1.1 读取已完成记录**
+---
 
-1. 获取当前用户身份及对应的个人报销 Base Token（详见 `references/feishu-base.md`）
-2. 读取个人 Base 中所有记录，筛选 `审批状态 ∈ [已通过, 已打款]` 的条目
+## Workflow
+
+### Phase 1 — Data Preparation
+
+**1.1 Read Completed Records**
+
+1. Get current user identity and corresponding personal reimbursement Base Token (see `references/feishu-base.md`)
+2. Read all records from personal Base, filter where `Approval Status ∈ [Approved, Paid]`
    ```bash
    lark-cli base +record-list \
-     --base-token "<个人base_token>" \
+     --base-token "<personal_base_token>" \
      --table-id "<table_id>" \
      --limit 500
    ```
 
-如需要全局汇总（多员工视角），可读取汇总 Base 的「报销总览」表（只读权限）。
+For global aggregation (multi-employee view), read the master Base "Reimbursement Overview" table (read-only permission).
 
-**1.2 筛选范围**
-根据用户要求筛选：
-- 时间范围（本月/本季/本年/自定义）— 按 `发生日期` 的 Unix 时间戳范围过滤
-- 申请人 — 按 user 字段匹配
-- 归属部门 — 按 select 字段匹配
-- 报销类型 — 按 select 字段匹配
+**1.2 Filter Scope**
+Filter based on user request:
+- Time range (this month / this quarter / this year / custom) — filter by `Date` Unix timestamp range
+- Applicant — match by user field
+- Department — match by select field
+- Expense type — match by select field
 
-如用户未指定范围，默认按最近一个月汇总，并询问是否需要扩展。
+If user does not specify scope, default to last month summary and ask whether to expand.
 
 ---
 
-### 阶段 2 — 台账生成
+### Phase 2 — Ledger Generation
 
-生成适合会计入账的行格式记录：
+Generate row-format records suitable for accounting entry:
 
 ```markdown
-## 台账记录
+## Ledger Records
 
-| 发生日期 | 申请人 | 归属部门 | 报销类型 | 报销金额 | 不含税金额 | 税额 | 发票号 | 审批状态 | 打款日期 | 发票凭证 |
-|----------|--------|----------|----------|----------|-----------|------|--------|----------|----------|----------|
-| ...      | ...    | ...      | ...      | ...      | ...       | ...  | ...    | ...      | ...      | ...      |
+| Date | Applicant | Department | Type | Amount | Pre-tax Amount | Tax | Invoice # | Approval Status | Payment Date | Invoice Doc |
+|------|-----------|------------|------|--------|---------------|------|--------|----------------|--------------|-------------|
+| ...  | ...       | ...        | ...  | ...    | ...           | ...  | ...    | ...            | ...          | ...         |
 ```
 
-如用户要求导出，生成 CSV 或 Excel。字段映射保持与 Base 一致。
+If user requests export, generate CSV or Excel. Field mapping stays consistent with Base.
 
 ---
 
-### 阶段 3 — 汇总看板
+### Phase 3 — Summary Dashboard
 
-生成管理层视角的汇总报表。
+Generate management-view summary reports.
 
-**3.1 费用趋势**
-按时间粒度（周/月）展示费用走势：
+**3.1 Expense Trend**
+Show expense trends by time granularity (week/month):
 
 ```markdown
-## 费用趋势
+## Expense Trend
 
-| 月份 | 总支出 | 环比 |
-|------|--------|------|
+| Month | Total Expense | MoM |
+|-------|---------------|-----|
 | 2024-01 | 3200 | — |
 | 2024-02 | 2800 | -12.5% |
 | 2024-03 | 4500 | +60.7% |
 ```
 
-> 实现方式：读取 Base 记录后，按月份分组聚合 `报销金额`。也可使用 `lark-cli base +data-query` 直接在 Base 侧做聚合查询。
+> Implementation: read Base records, group by month and aggregate `Amount`. Or use `lark-cli base +data-query` for server-side aggregation.
 
-**3.2 类型分解**
-按报销类型展示分布：
+**3.2 Category Breakdown**
+Show distribution by expense type:
 
 ```markdown
-## 类型分布
+## Category Distribution
 
-| 报销类型 | 金额 | 占比 | 笔数 |
-|----------|------|------|------|
-| 差旅     | 2000 | 40%  | 5    |
-| 交通     | 800  | 16%  | 12   |
-| 招待     | 1500 | 30%  | 3    |
-| ...      | ...  | ...  | ...  |
+| Type | Amount | Share | Count |
+|------|--------|-------|-------|
+| Travel | 2000 | 40% | 5 |
+| Transportation | 800 | 16% | 12 |
+| Entertainment | 1500 | 30% | 3 |
+| ... | ... | ... | ... |
 ```
 
-**3.3 部门对比**
-如有多部门数据，展示部门间对比：
+**3.3 Department Comparison**
+If multi-department data available, show inter-department comparison:
 
 ```markdown
-## 部门对比
+## Department Comparison
 
-| 归属部门 | 总支出 | 人均 | 最大单笔 |
-|----------|--------|------|----------|
-| 技术部   | 5000   | 625  | 1999     |
-| 市场部   | 8000   | 1000 | 3000     |
+| Department | Total Expense | Per Capita | Largest Single |
+|------------|---------------|------------|----------------|
+| Engineering | 5000 | 625 | 1999 |
+| Marketing | 8000 | 1000 | 3000 |
 ```
 
-**3.4 预算 vs 实际**
-如用户提供了预算数据，计算执行率：
+**3.4 Budget vs Actual**
+If user provides budget data, calculate execution rate:
 
 ```markdown
-## 预算执行
+## Budget Execution
 
-| 报销类型 | 预算 | 实际 | 执行率 | 状态 |
-|----------|------|------|--------|------|
-| 差旅     | 5000 | 4200 | 84%   | ✅ 正常 |
-| 招待     | 3000 | 3500 | 117%  | ⚠️ 超支 |
+| Type | Budget | Actual | Execution Rate | Status |
+|------|--------|--------|----------------|--------|
+| Travel | 5000 | 4200 | 84% | ✅ Normal |
+| Entertainment | 3000 | 3500 | 117% | ⚠️ Over |
 ```
 
 ---
 
-### 阶段 4 — 异常检测
+### Phase 4 — Anomaly Detection
 
-自动标记异常项：
-- 超预算的类型或部门
-- 单笔金额异常高（超过同类型平均值 3 倍）
-- 报销频率异常（某员工短期内密集报销）
-- 审批周期过长（从"待审批"到"已通过"的耗时）
-- 发票号码重复（利用 Base 中「发票号码重复检查」formula 字段）
+Auto-flag anomalies:
+- Over-budget types or departments
+- Abnormally high single expenses (exceed 3× same-type average)
+- Abnormal reimbursement frequency (employee密集报销 within short period)
+- Overlong approval cycle (time from "Pending Approval" to "Approved")
+- Duplicate invoice numbers (using Base "Invoice Number Duplicate Check" formula field)
 
 ---
 
-## Base 聚合查询（可选）
+## Base Aggregation Query (Optional)
 
-对于大量数据，可使用 `lark-cli base +data-query` 在 Base 侧直接做聚合，减少数据传输：
+For large data volumes, use `lark-cli base +data-query` for server-side aggregation to reduce data transfer:
 
 ```bash
 lark-cli base +data-query \
   --base-token "<base_token>" \
-  --json '{"type":"aggr","tableId":"<table_id>","fieldName":"报销金额","aggregator":"SUM","groupBy":"报销类型"}'
+  --json '{"type":"aggr","tableId":"<table_id>","fieldName":"Amount","aggregator":"SUM","groupBy":"Expense Type"}'
 ```
 
-> 具体 DSL 语法需参考飞书 Base 数据查询文档，根据返回的字段 ID 调整。
+> Specific DSL syntax refers to Feishu Base data query documentation; adjust returned field IDs as needed.
 
 ---
 
-## 输出格式
+## Output Formats
 
-| 交付物 | 格式 | 使用场景 |
-|--------|------|----------|
-| 台账 | CSV / Excel | 导入会计系统 |
-| 看板 | Markdown 表格 + 图表描述 | 管理层汇报 |
-| 异常报告 | Markdown 列表 | 风控/审计 |
+| Deliverable | Format | Use Case |
+|-------------|--------|----------|
+| Ledger | CSV / Excel | Import into accounting system |
+| Dashboard | Markdown table + chart description | Management reporting |
+| Anomaly Report | Markdown list | Risk control / audit |
 
-内联展示默认 Markdown。仅当用户明确要求时生成文件。
+Default inline display is Markdown. Only generate files when explicitly requested.
 
 ---
 
-## 示例
+## Examples
 
-**示例 1 — 月度看板**
-输入："汇总一下这个月的报销，做个看板"
-输出：从个人 Base 读取"已通过"/"已打款"记录 → 费用趋势 + 类型分布 + 部门对比，内联 Markdown 表格
+**Example 1 — Monthly Dashboard**
+Input: "Summarize this month's reimbursement, make a dashboard"
+Output: Read personal Base "Approved"/"Paid" records → expense trend + category distribution + department comparison, inline Markdown tables
 
-**示例 2 — 预算分析**
-输入："看看 Q1 预算执行情况，哪些超了"
-输出：预算 vs 实际表格，标注超支项，给出异常分析
+**Example 2 — Budget Analysis**
+Input: "See Q1 budget execution, what's over"
+Output: Budget vs actual table, flag over-budget items, provide anomaly analysis
 
-**示例 3 — 台账导出**
-输入："把上半年所有已打款的报销导出成 Excel"
-输出：台账格式的 Excel 文件，含发生日期、申请人、归属部门、报销类型、报销金额、不含税金额、税额、发票号、打款日期等字段
+**Example 3 — Ledger Export**
+Input: "Export all paid reimbursements from H1 as Excel"
+Output: Ledger-format Excel with Date, Applicant, Department, Type, Amount, Pre-tax Amount, Tax, Invoice #, Payment Date, etc.

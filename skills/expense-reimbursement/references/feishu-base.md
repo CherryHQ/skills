@@ -1,18 +1,18 @@
-# 飞书多维表格参考（Base / Bitable）
+# Feishu Bitable Reference (Base / Bitable)
 
-> 本文件供参考查阅：auth 检查、配置常量、字段 schema。所有 Base 写入操作均通过 `scripts/invoice_intake.py` 执行，不要手动拼接 lark-cli 命令。
+> Reference lookup: auth check, config constants, field schema. All Base write operations go through `scripts/invoice_intake.py` — do not manually construct lark-cli commands.
 
 ---
 
-## 前提条件
+## Prerequisites
 
-执行任何飞书表格操作前，先确认 OAuth 已连接：
+Before any Feishu table operation, confirm OAuth is connected:
 
 ```bash
 lark-cli auth status
 ```
 
-如未连接：
+If not connected:
 
 ```bash
 lark-cli auth login --domain base,drive,sheets,contact
@@ -20,36 +20,36 @@ lark-cli auth login --domain base,drive,sheets,contact
 
 ---
 
-## 配置
+## Config
 
-| 配置项 | 值 |
-|--------|-----|
-| 汇总索引 Base Token | `JGzKb5SKSal9A3suMyRcxRepnLe` |
-| 汇总索引表 ID | `tblavWeOwUGHQZhA` |
+| Config Item | Value |
+|-------------|-------|
+| Master Index Base Token | `JGzKb5SKSal9A3suMyRcxRepnLe` |
+| Master Index Table ID | `tblavWeOwUGHQZhA` |
 
-> 汇总表存储「姓名 → 个人报销 Base Token」映射，只读，不做写入。
+> The master table stores "Name → Personal Reimbursement Base Token" mapping. Read-only, no writes.
 
 ---
 
-## 个人报销表字段 Schema
+## Personal Reimbursement Table Field Schema
 
-字段以实际表结构为准，通过以下命令动态获取：
+Fields are determined by actual table structure. Dynamically fetch via:
 
 ```bash
-# 先定位个人 Base token（从汇总索引按姓名匹配）
+# First locate personal Base token (match by name from master index)
 lark-cli base +field-list \
-  --base-token "<个人base_token>" \
+  --base-token "<personal_base_token>" \
   --table-id "<table_id>"
 ```
 
 ---
 
-## 关键注意点
+## Key Gotchas
 
-| 要点 | 说明 |
-|------|------|
-| 日期格式 | datetime 字段传**毫秒级** Unix 时间戳（秒 × 1000），传秒级会导致显示 1970 年 |
-| 附件路径 | `+record-upload-attachment --file` 只接受相对路径，需先 `cd` 到文件目录 |
-| 高级权限 | Base 开启高级权限时，应用/用户需有编辑权限，否则报 `91403 Forbidden` |
-| select 字段 | 传选项名称字符串，区分大小写，必须与 Base 配置完全一致 |
-| formula / auto_number | 只读，写入时跳过 |
+| Gotcha | Description |
+|--------|-------------|
+| Date format | datetime fields accept **millisecond-level** Unix timestamp (seconds × 1000). Passing seconds shows 1970. |
+| Attachment path | `+record-upload-attachment --file` only accepts relative paths. Must `cd` to the file directory first. |
+| Advanced permissions | When Base has advanced permissions enabled, app/user needs edit permission or gets `91403 Forbidden`. |
+| Select fields | Pass option name string, case-sensitive, must match Base config exactly. |
+| Formula / auto_number | Read-only, skip during writes. |

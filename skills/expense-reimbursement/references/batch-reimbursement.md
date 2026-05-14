@@ -1,185 +1,185 @@
-# 批量报销（汇总 + 草稿 + 审批）
+# Batch Reimbursement (Aggregation + Draft + Approval)
 
-用户使用本文件的场景：把暂存的发票批量汇总，生成报销草稿，完成校验，发起审批流转。
+User scenario for this file: batch aggregate staged invoices, generate reimbursement draft, perform validation, initiate approval workflow.
 
-> 与「发票录入」阶段衔接：录入时记录状态为"待审批"，批量阶段将其推进到审批流程。
-
----
-
-## 目标
-
-从个人报销 Base 读取所有状态为"待审批"的记录，汇总分类，执行完整规则校验，生成报销草稿供员工确认，然后生成审批包流转至主管和财务。
+> Connects with the "Invoice Intake" phase: intake records status as "Pending Approval", batch phase advances them into the approval workflow.
 
 ---
 
-## 工作流
+## Goal
 
-### 阶段 1 — 汇总与分类
+Read all "Pending Approval" records from the personal reimbursement Base, group and categorize them, perform full rule validation, generate a reimbursement draft for employee confirmation, then package it for manager review and finance approval.
 
-**1.1 读取待审批记录**
+---
 
-1. 获取当前用户身份：`lark-cli api GET "/open-apis/authen/v1/user_info"`
-2. 从汇总索引 Base 定位个人报销 Base Token（详见 `references/feishu-base.md`）
-3. 读取个人 Base 中所有记录，筛选 `审批状态 = 待审批` 的条目
+## Workflow
+
+### Phase 1 — Aggregation & Categorization
+
+**1.1 Read Pending Records**
+
+1. Get current user identity: `lark-cli api GET "/open-apis/authen/v1/user_info"`
+2. Locate personal reimbursement Base Token from the master index (see `references/feishu-base.md`)
+3. Read all records from personal Base, filter where `Approval Status = Pending Approval`
    ```bash
    lark-cli base +record-list \
-     --base-token "<个人base_token>" \
+     --base-token "<personal_base_token>" \
      --table-id "<table_id>" \
      --limit 200
    ```
 
-如用户提供了外部文件（Excel/CSV），一并读取并合并。
+If user provides external files (Excel/CSV), read and merge them too.
 
-**1.2 按类型分组**
-按费用类型（差旅/餐饮/交通/办公用品/通讯/培训/招待/其他）分组汇总。
+**1.2 Group by Type**
+Group by expense type (Travel / Dining / Transportation / Office Supplies / Communications / Training / Entertainment / Other).
 
-**1.3 时间范围推断**
-从记录的最早日期和最晚日期推断报销期间。如跨度超过一个自然月，询问用户是否拆分多月报销。
-
----
-
-### 阶段 2 — 规则校验
-
-对所有记录执行以下校验：
-
-| 检查项 | 校验内容 |
-|--------|----------|
-| **重复报销** | 发票号在个人 Base 全量记录中重复（利用「发票号码重复检查」formula 字段或本地比对） |
-| **完整性** | 必填字段缺失（发生日期、报销金额、报销类型、事由说明） |
-| **金额合理性** | 单笔金额异常高（超过同类型平均值 3 倍） |
-
-生成**校验报告**，逐项列出问题及严重级别（⚠️ 警告 / ❌ 阻断）和说明。
+**1.3 Time Range Inference**
+Infer reimbursement period from earliest to latest record date. If span exceeds one calendar month, ask user whether to split into multiple months.
 
 ---
 
-### 阶段 3 — 草稿生成
+### Phase 2 — Rule Validation
 
-**3.1 生成报销草稿**
-将所有已校验项目汇总为报销申请草稿：
+Perform the following checks on all records:
+
+| Check | Validation Content |
+|-------|-------------------|
+| **Duplicate reimbursement** | Invoice number duplicates across all personal Base records (using "Invoice Number Duplicate Check" formula field or local comparison) |
+| **Completeness** | Required fields missing (Date, Amount, Type, Description) |
+| **Amount合理性** | Single item amount abnormally high (exceeds 3× same-type average) |
+
+Generate a **validation report**, listing each issue with severity (⚠️ Warning / ❌ Blocker) and explanation.
+
+---
+
+### Phase 3 — Draft Generation
+
+**3.1 Generate Reimbursement Draft**
+Aggregate all validated items into a reimbursement application draft:
 
 ```markdown
-# 报销申请草稿 — [申请人] — [日期范围]
+# Reimbursement Draft — [Applicant] — [Date Range]
 
-## 基本信息
-- 申请人：[姓名]
-- 归属部门：[部门]
-- 申请日期：YYYY-MM-DD
-- 报销期间：YYYY-MM-DD ~ YYYY-MM-DD
+## Basic Info
+- Applicant: [Name]
+- Department: [Dept]
+- Application Date: YYYY-MM-DD
+- Reimbursement Period: YYYY-MM-DD ~ YYYY-MM-DD
 
-## 费用明细
-| # | 发生日期 | 报销类型 | 事由说明 | 商户 | 报销金额 | 不含税金额 | 税额 | 发票号 | 发票凭证 |
-|---|----------|----------|----------|------|----------|-----------|------|--------|----------|
-| 1 | ...      | ...      | ...      | ...  | ...      | ...       | ...  | ...    | ...      |
+## Expense Details
+| # | Date | Type | Description | Merchant | Amount | Pre-tax Amount | Tax | Invoice # | Invoice Doc |
+|---|------|------|-------------|------|--------|---------------|------|--------|-------------|
+| 1 | ...  | ...  | ...         | ...  | ...    | ...           | ...  | ...    | ...         |
 
-## 分类汇总
-| 报销类型 | 金额 | 占比 |
-|----------|------|------|
-| 差旅     | 553  | 35%  |
-| ...      | ...  | ...  |
-| **合计** | **1200** | **100%** |
+## Category Summary
+| Type | Amount | Share |
+|------|--------|-------|
+| Travel | 553 | 35% |
+| ... | ... | ... |
+| **Total** | **1200** | **100%** |
 
-## 校验结果
-- ✅ / ⚠️ / ❌  [逐项列出]
+## Validation Results
+- ✅ / ⚠️ / ❌  [list each]
 
-## 待确认项
-- [ ] 2024-03-02 差旅：发票号缺失
+## Items to Confirm
+- [ ] 2024-03-02 Travel: invoice number missing
 ```
 
-**3.2 员工确认**
-展示草稿，请员工：
-- 确认或修正任何字段
-- 补充缺失的事由 / 项目 / 附件
-- 接受或拒绝校验标记
+**3.2 Employee Confirmation**
+Present draft, ask employee to:
+- Confirm or correct any field
+- Supplement missing description / project / attachments
+- Accept or reject validation flags
 
-如员工拒绝，记录修正意见，返回阶段 1 重新处理。
-
----
-
-### 阶段 4 — 审批流转
-
-**4.1 生成审批包**
-员工确认后，生成**审批包**：
-- 费用明细表
-- 校验报告
-- 分类汇总
-- 支撑附件索引（从 Base attachment 字段中提取）
-
-**4.2 主管审核**
-以适合直属主管快速决策的格式呈现：
-- 总金额
-- 最大单笔支出
-- 标记项清单
-- 预算影响摘要
-
-**4.3 财务复核**
-主管批准后，呈现**财务复核包**：
-- 合规性（票据完整性、真伪）
-- 预算执行情况
-- 成本中心分配
-
-**4.4 驳回处理**
-如任何阶段被驳回，记录：
-- 驳回原因
-- 所需修正
-- 退回员工修改后重新提交
-- 在个人 Base 中将对应记录状态更新为 `"已驳回"`
+If employee rejects, record corrections, return to Phase 1 for reprocessing.
 
 ---
 
-### 阶段 5 — 状态更新（Base 写入）
+### Phase 4 — Approval Workflow
 
-审批流转完成后，批量更新个人 Base 中对应记录的审批状态。
+**4.1 Generate Approval Package**
+After employee confirmation, generate **approval package**:
+- Expense detail table
+- Validation report
+- Category summary
+- Supporting attachment index (extracted from Base attachment fields)
 
-**5.1 批量更新状态**
+**4.2 Manager Review**
+Present in format suitable for direct manager quick decision:
+- Total amount
+- Largest single expense
+- Flagged items list
+- Budget impact summary
+
+**4.3 Finance Review**
+After manager approval, present **finance review package**:
+- Compliance (invoice completeness, authenticity)
+- Budget execution status
+- Cost center allocation
+
+**4.4 Rejection Handling**
+If rejected at any stage, record:
+- Rejection reason
+- Required corrections
+- Return to employee for modification and resubmission
+- Update corresponding records in personal Base to `"Rejected"`
+
+---
+
+### Phase 5 — Status Update (Base Write)
+
+After approval workflow completes, batch-update approval status of corresponding records in personal Base.
+
+**5.1 Batch Status Update**
 
 ```bash
 lark-cli api POST "/open-apis/bitable/v1/apps/<base_token>/tables/<table_id>/records/batch_update" \
   --data '{
     "records": [
-      {"record_id":"rec_xxx","fields":{"审批状态":"已通过"}},
-      {"record_id":"rec_yyy","fields":{"审批状态":"已通过"}}
+      {"record_id":"rec_xxx","fields":{"Approval Status":"Approved"}},
+      {"record_id":"rec_yyy","fields":{"Approval Status":"Approved"}}
     ]
   }'
 ```
 
-状态流转：
-- 主管审核通过 → `"已通过"`
-- 财务打款完成 → `"已打款"` + 更新 `打款日期`
-- 被驳回 → `"已驳回"`（退回员工修改）
+Status flow:
+- Manager approved → `"Approved"`
+- Finance paid → `"Paid"` + update `Payment Date`
+- Rejected → `"Rejected"` (return to employee for modification)
 
-**5.2 付款日期写入**
-打款完成后，将 `打款日期` 字段更新为当前日期（Unix 时间戳秒级）。
+**5.2 Payment Date Write**
+After payment completes, update `Payment Date` field to current date (Unix timestamp in seconds).
 
 ```bash
 TS=$(date +%s)
 lark-cli api PATCH "/open-apis/bitable/v1/apps/<base_token>/tables/<table_id>/records/<record_id>" \
-  --data "{\"fields\":{\"审批状态\":\"已打款\",\"打款日期\":$TS}}"
+  --data "{\"fields\":{\"Approval Status\":\"Paid\",\"Payment Date\":$TS}}"
 ```
 
 ---
 
-## 输出格式
+## Output Formats
 
-| 交付物 | 格式 | 使用场景 |
-|--------|------|----------|
-| 报销草稿 | Markdown 表格 | 与员工内联确认 |
-| 审批包 | Markdown 表格 + 要点摘要 | 主管审核 |
-| 财务复核表 | Markdown 表格 + 标记 | 财务合规检查 |
+| Deliverable | Format | Use Case |
+|-------------|--------|----------|
+| Reimbursement Draft | Markdown table | Inline confirmation with employee |
+| Approval Package | Markdown table + bullet summary | Manager review |
+| Finance Review Table | Markdown table + flags | Finance compliance check |
 
-内联展示默认 Markdown。仅当用户明确要求时生成文件。
+Default inline display is Markdown. Only generate files when explicitly requested.
 
 ---
 
-## 示例
+## Examples
 
-**示例 1 — 月底汇总报销**
-输入："帮我整理这个月的报销，之前录入的那些发票"
-输出：读取个人 Base 中"待审批"记录 → 汇总分类 → 校验 → 生成草稿 → 员工确认 → 审批包
+**Example 1 — End-of-month batch reimbursement**
+Input: "Help me organize this month's reimbursement, those invoices I entered before"
+Output: Read personal Base "Pending Approval" records → aggregate by category → validate → generate draft → employee confirm → approval package
 
-**示例 2 — 差旅批量报销**
-输入："把出差那几天的发票一起报了吧，高铁、酒店、客户吃饭"
-输出：按差旅/餐饮/招待分类汇总，生成完整草稿，标记同日差旅+餐饮的合理性
+**Example 2 — Travel batch reimbursement**
+Input: "Submit those invoices from the business trip together: train, hotel, client dinner"
+Output: Group by Travel / Dining / Entertainment, generate complete draft, flag same-day Travel+Dining reasonableness
 
-**示例 3 — 驳回修正**
-输入："主管说招待费超标了，帮我改改再提"
-输出：定位超标招待费用，提出拆单或调整成本中心方案，在个人 Base 中修正后，将状态改回"待审批"重新提交
+**Example 3 — Rejection correction**
+Input: "Manager said entertainment expense was over limit, help me fix and resubmit"
+Output: Locate over-limit entertainment, propose split-order or cost-center adjustment options, fix in personal Base, change status back to "Pending Approval" for resubmission

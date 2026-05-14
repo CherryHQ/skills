@@ -1,4 +1,4 @@
-# Golden Sentence Standards (金句标准)
+# Golden Sentence Standards
 
 ⚠️ **Short insights are the easiest to get wrong. Apply strict filtering.**
 
@@ -23,7 +23,7 @@ For each potential insight, ask:
 ### ❌ Mistake 1: Needs Too Much Context
 
 **Bad Example:**
-> "激励Gemini多好，我激励人干嘛？"
+> "Incentivizing Gemini is great, why would I incentivize people?"
 
 **Problem:** What are we talking about? Why incentivize Gemini?
 
@@ -34,7 +34,7 @@ For each potential insight, ask:
 ### ❌ Mistake 2: Just Numbers, No Meaning
 
 **Bad Example:**
-> "Plaud 3亿美金 vs 影石10亿人民币"
+> "Plaud $300M vs Insta360 ¥1B revenue"
 
 **Problem:** Two numbers being compared - so what?
 
@@ -45,7 +45,7 @@ For each potential insight, ask:
 ### ❌ Mistake 3: Requires Industry Background
 
 **Bad Example:**
-> "剪映还在纠结做工具还是社区"
+> "CapCut is still纠结 whether to be a tool or a community"
 
 **Problem:** Why is this a dilemma? What's the impact?
 
@@ -56,9 +56,10 @@ For each potential insight, ask:
 ### ✅ Example 1: Add Simple Background (80 characters)
 
 ```
-朋友吐槽，在大厂做AI的感受是：
+A friend complained about doing AI at a big company:
 
-很多人没那么拥抱AI，但又要做，然后又不理解，还要逼逼。
+Many people don't really embrace AI, but have to do it, 
+then don't understand it, yet keep complaining.
 ```
 
 **Why it works:**
@@ -71,38 +72,42 @@ For each potential insight, ask:
 ### ✅ Example 2: Has Shocking Contrast (120 characters)
 
 ```
-Plaud，一个做AI录音笔的公司，今年预计营收3亿美金。
+Plaud, an AI voice recorder company, is projected to 
+do $300M revenue this year.
 
-什么概念？做了很多年、技术硬核的影石，一年营收也就10亿人民币。
+What does that mean? Insta360, with years of hardcore 
+tech, does about ¥1B annually.
 
-这就是AI硬件的红利期。
+That's the AI hardware dividend period.
 ```
 
 **Why it works:**
 - Data has shock value
 - Clear contrast (new simple product vs old complex product)
-- Has interpretation ("AI硬件的红利期")
+- Has interpretation ("AI hardware dividend period")
 
 ---
 
 ### ✅ Example 3: Add 1-2 Sentences Background (80 characters)
 
 ```
-面试一个00后，问他"你怎么理解AI native？"
+Interviewing a Gen Z candidate: "How do you 
+understand AI native?"
 
-他回答："什么是AI native？"
+He answered: "What's AI native?"
 
-这是我听过最正确的答案。怎么可能问一个鱼什么是水？
+That's the most correct answer I've ever heard. 
+How can you ask a fish what water is?
 ```
 
 **Why it works:**
 - Has a story
-- Has the golden sentence ("怎么可能问一个鱼什么是水？")
+- Has the golden sentence ("How can you ask a fish what water is?")
 - Complete meaning
 
 ## Filtering Philosophy
 
-**宁缺毋滥 - Quality Over Quantity:**
+**Quality Over Quantity — Better none than bad:**
 
 Quality standard is FIXED. Quantity is the NATURAL RESULT of strict filtering.
 
@@ -112,8 +117,8 @@ Quality standard is FIXED. Quantity is the NATURAL RESULT of strict filtering.
 - **If 10 insights pass** → Output 10
 
 **DO NOT:**
-- ❌ Force output when nothing passes ("需要3条" mentality)
-- ❌ Artificially limit quantity when many pass ("最多2条" mentality)
+- ❌ Force output when nothing passes ("need 3 items" mentality)
+- ❌ Artificially limit quantity when many pass ("max 2 items" mentality)
 - ❌ Lower standards to meet quota
 - ❌ Skip good insights because "already have enough"
 
@@ -123,7 +128,7 @@ Quality standard is FIXED. Quantity is the NATURAL RESULT of strict filtering.
 - All candidates lack sufficient impact
 - No clear "aha moment" or shock value
 
-**The goal:** Every insight you output should make you think "这条真的可以单独发即刻". If you hesitate, don't output it.
+**The goal:** Every insight you output should make you think "this could stand alone as a post". If you hesitate, don't output it.
 
 ## Additional Guidelines
 

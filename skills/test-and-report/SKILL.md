@@ -1,157 +1,157 @@
 ---
 name: test-and-report
-description: Manual testing + bug filing for Cherry Studio / Cherry Studio Enterprise (Express SaaS). Parses a Feishu test doc (scope + repo + bitable URL), observes staging via claude-in-chrome, captures DOM/console/network/screenshot evidence, then dual-tracks each finding — Feishu bitable record (with attachments) + GitHub issue (CherryHQ#14338 format — English-primary, Chinese 折叠, R2-hosted screenshots, matching type label). Enforces dedup across bitable + GitHub issues + PRs, and mandatory P0/P1/P2 priority prompt when unclear. Trigger whenever the user says "test and report", "边测边报", "开始系统测试", "帮我测 cherry / express saas", "体验 staging", "协作提 bug", "收集反馈", a shared Feishu testing doc, a bitable URL + finding, or any UX/bug needing both bitable + GitHub tracking. Do NOT use for writing Cherry Studio code, PR review, CI debugging, or general "how do I use Cherry Studio" questions — those go to normal dev / PR-review / support flows.
+description: Manual testing + bug filing for Cherry Studio / Cherry Studio Enterprise (Express SaaS). Parses a Feishu test doc (scope + repo + bitable URL), observes staging via claude-in-chrome, captures DOM/console/network/screenshot evidence, then dual-tracks each finding — Feishu Bitable record (with attachments) + GitHub issue (CherryHQ#14338 format — English-primary, Chinese collapsed, R2-hosted screenshots, matching type label). Enforces dedup across bitable + GitHub issues + PRs, and mandatory P0/P1/P2 priority prompt when unclear. Trigger whenever the user says "test and report", "边测边报", "开始系统测试", "帮我测 cherry / express saas", "体验 staging", "协作提 bug", "收集反馈", a shared Feishu testing doc, a bitable URL + finding, or any UX/bug needing both bitable + GitHub tracking. Do NOT use for writing Cherry Studio code, PR review, CI debugging, or general "how do I use Cherry Studio" questions — those go to normal dev / PR-review / support flows.
 ---
 
-# Cherry 测试协作与 Bug 收集
+# Cherry Test & Report
 
-把"飞书测试文档 → 浏览器抓证据 → 双轨提交（多维表格 + GitHub issue）"的全流程打包，保证每条反馈都带齐环境信息、截图、查重结论、优先级，落到两处可追踪。
+A skill that packages the full flow: "Feishu test doc → browser evidence capture → dual-track submission (Bitable + GitHub issue)" so every piece of feedback includes environment info, screenshots, dedup conclusion, and priority, tracked in two systems.
 
-## 触发边界（什么时候用、什么时候不用）
+## Trigger Boundaries (when to use / when not to use)
 
-**用本 skill**：
-- 用户发来飞书测试文档 URL（通常含测试范围 + 代码仓库 + 多维表格链接）
-- 用户说"开始测 / 帮我测 / 体验 staging / 协作提 bug / 收集反馈"
-- 用户描述一个 UX / 功能问题，并且要落到 bitable + GitHub 双轨
-- 用户把已知的测试 bitable（如 `IJQPbTzZhaObMQsuL5OcbaoBnag` / `AdeDbC9VgaNkrEsXtk5cTMarn2e`）的 URL 发过来并提反馈
+**Use this skill:**
+- User sends a Feishu test doc URL (usually contains test scope + code repo + Bitable link)
+- User says "start testing / help me test / experience staging / collab on bugs / collect feedback"
+- User describes a UX / functional issue and wants it tracked in both Bitable + GitHub
+- User sends a known test Bitable URL (e.g. `IJQPbTzZhaObMQsuL5OcbaoBnag` / `AdeDbC9VgaNkrEsXtk5cTMarn2e`) with feedback
 
-**不用本 skill**：
-- 用户让你改 Cherry Studio 代码 / 提 PR → 走常规开发流程
-- 用户让你 review 现有 PR → 用 `gh-pr-review` skill
-- CI / 构建失败排查 → 用常规调试
-- 用户问"Cherry Studio 怎么用 / 怎么下载" → 一般回答即可
+**Do NOT use this skill:**
+- User asks you to write Cherry Studio code / open a PR → use normal dev flow
+- User asks you to review an existing PR → use `gh-pr-review` skill
+- CI / build failure debugging → use normal debugging
+- User asks "how do I use Cherry Studio / where do I download" → general answer
 
 ---
 
-## 前置检查（执行前先确认）
+## Prerequisites (check before executing)
 
-| 能力 | 检查方式 | 缺失时处理 |
-|------|---------|-----------|
-| claude-in-chrome 扩展 | `mcp__claude-in-chrome__tabs_context_mcp` 能返回 tab 列表 | 引导用户从 claude.com/chrome 安装并点 Connect，等"搞定"再继续 |
-| lark-cli 已登录 | `lark-cli contact +get-user --jq .data.user.name` | 跳到 `lark-shared` skill 做认证 |
-| gh CLI 有 repo 写权限 | `gh api repos/<OWNER>/<REPO> --jq .permissions` 里 `push` 为 true | 让用户给当前 GitHub 账号加 triage/write |
-| R2 图床可用 | `which upload-img` 返回 `~/.local/bin/upload-img` | 手动降级：让用户把截图拖进 GitHub issue 编辑器 |
+| Capability | Check Method | If Missing |
+|------------|-------------|------------|
+| claude-in-chrome extension | `mcp__claude-in-chrome__tabs_context_mcp` returns tab list | Guide user to install from claude.com/chrome and click Connect, wait for "done" |
+| lark-cli logged in | `lark-cli contact +get-user --jq .data.user.name` | Jump to `lark-shared` skill for auth |
+| gh CLI has repo write access | `gh api repos/<OWNER>/<REPO> --jq .permissions` shows `push: true` | Ask user to grant triage/write to current GitHub account |
+| R2 image hosting available | `which upload-img` returns `~/.local/bin/upload-img` | Manual fallback: ask user to drag screenshot into GitHub issue editor |
 
-## 工作流总览
+## Workflow Overview
 
 ```
-Phase 1  解析测试文档 (飞书 doc → 配置)
-Phase 2  浏览器连接 (claude-in-chrome)
-Phase 3  陪测：用户操作，agent 观察
-Phase 4  每条 bug 的提交（查重 → 优先级 → 上传截图 → 多维表格 + GitHub 双轨）
-Phase 5  回到 Phase 3 继续，直到用户说收工
+Phase 1  Parse test doc (Feishu doc → config)
+Phase 2  Browser setup (claude-in-chrome)
+Phase 3  Accompany testing: user operates, agent observes
+Phase 4  Per-bug submission (dedup → priority → upload screenshot → Bitable + GitHub dual-track)
+Phase 5  Return to Phase 3 until user says "done"
 ```
 
 ---
 
-## Phase 1: 解析测试文档
+## Phase 1: Parse Test Document
 
-用户提供一个飞书文档 URL。用 `lark-cli docs +fetch --doc <URL> --format pretty` 拉全文，从中提取：
+User provides a Feishu document URL. Use `lark-cli docs +fetch --doc <URL> --format pretty` to pull full text, then extract:
 
-| 配置项 | 通常在文档哪里 |
-|--------|--------------|
-| **测试主题 / 范围** | 标题 + 开头段落 |
-| **代码仓库**（GitHub URL） | "参考仓库" / "代码仓库" 段落，或正文里的 GitHub 链接 |
-| **测试 staging URL** | "测试环境" / "访问地址" 段落 |
-| **问题收集多维表格** | "问题收集" / "bug 列表" 段落里的 `mcnnox2fhjfq.feishu.cn/wiki/...?table=tbl...` 或 `/base/...?table=tbl...` |
+| Config Item | Usually Found In |
+|-------------|-----------------|
+| **Test topic / scope** | Title + opening paragraphs |
+| **Code repository** (GitHub URL) | "Reference repo" / "Code repository" section, or GitHub link in body |
+| **Staging URL** | "Test environment" / "Access URL" section |
+| **Issue collection Bitable** | "Issue collection" / "Bug list" section with `mcnnox2fhjfq.feishu.cn/wiki/...?table=tbl...` or `/base/...?table=tbl...` |
 
-**如果用户没给文档，只给了 bitable URL**：先识别是哪个产品（见下方自动识别规则），直接用 `references/bitable-bases.md` 的配置，staging URL 从 bitable 第一行记录或明确问用户。
+**If user only gives a Bitable URL without a document**: identify the product (see auto-detection rules below), use the config from `references/bitable-bases.md`, and ask user for the staging URL if not found in the Bitable first record.
 
-### 自动识别当前产品
+### Auto-detect Current Product
 
-按下面的信号判断是哪个产品，从而知道用哪个仓库 + bitable：
+Use these signals to determine which product, and therefore which repo + Bitable to use:
 
-| 信号 | 产品 | 仓库 | Bitable |
-|------|------|------|---------|
-| URL 含 `cse-admin-staging.cherry-ai.com` / `cherry-studio-enterprise-api` / "Express SaaS" / "Enterprise" | **Cherry Studio Enterprise** | `CherryInternal/cherry-studio-enterprise-api` | `IJQPbTzZhaObMQsuL5OcbaoBnag` / `tbl20SIk4B78Ydpg` |
-| 提到"客户端" / "桌面版" / `github.com/CherryHQ/cherry-studio` / Electron | **Cherry Studio 客户端** | `CherryHQ/cherry-studio` | `AdeDbC9VgaNkrEsXtk5cTMarn2e` / `tbl7eUvrbfM7XFqg` |
-| 都不明确 | 问用户 | — | — |
+| Signal | Product | Repository | Bitable |
+|--------|---------|------------|---------|
+| URL contains `cse-admin-staging.cherry-ai.com` / `cherry-studio-enterprise-api` / "Express SaaS" / "Enterprise" | **Cherry Studio Enterprise** | `CherryInternal/cherry-studio-enterprise-api` | `IJQPbTzZhaObMQsuL5OcbaoBnag` / `tbl20SIk4B78Ydpg` |
+| Mentions "client" / "desktop" / `github.com/CherryHQ/cherry-studio` / Electron | **Cherry Studio Desktop** | `CherryHQ/cherry-studio` | `AdeDbC9VgaNkrEsXtk5cTMarn2e` / `tbl7eUvrbfM7XFqg` |
+| Neither clear | Ask user | — | — |
 
-已知配置详情（包括字段 ID、枚举值、视图速查）见 `references/bitable-bases.md`。
-
----
-
-## Phase 2: 浏览器设置
-
-1. `tabs_context_mcp { createIfEmpty: true }` 检查连接
-2. 没连上 → 引导用户装 claude-in-chrome 扩展（claude.com/chrome），装完点 Connect，再重试
-3. 连上之后 `navigate` 到 staging URL
-4. 顺手做一次基线采集（用户还没报 bug 之前）：
-   - `read_page --filter interactive` 看主要交互元素
-   - `read_console_messages` / `read_network_requests` 开始记录
-   - （如有）记一下页面的核心脚本来源（第三方 captcha / CDN / 埋点）
-
-**工具坑提醒**：
-- `javascript_tool` 偶尔报 `Cannot access a chrome-extension:// URL of different extension`，通常是页面引了跨扩展 iframe（例如 Geetest）。遇到就降级靠 `read_page` + 读源码。
-- `read_console_messages` / `read_network_requests` 需要页面加载时已在监听，建议刷新一次再读。
-- 不要同时用 `chrome-devtools` MCP 的 debug 功能——会跟 claude-in-chrome 抢 Debugger 协议。
+Known config details (field IDs, enum values, view shortcuts) are in `references/bitable-bases.md`.
 
 ---
 
-## Phase 3: 陪测循环
+## Phase 2: Browser Setup
 
-用户手动操作。agent 做两件事：
+1. `tabs_context_mcp { createIfEmpty: true }` to check connection
+2. If not connected → guide user to install claude-in-chrome extension (claude.com/chrome), click Connect, retry
+3. Once connected, `navigate` to staging URL
+4. Do a baseline capture before any bug is reported:
+   - `read_page --filter interactive` for main interactive elements
+   - `read_console_messages` / `read_network_requests` start recording
+   - (Optional) note core script sources (third-party captcha / CDN / analytics)
 
-1. **被动观察**：不主动驱动用户，不乱点
-2. **随叫随到**：用户说"这里有问题 / 点不动 / 报错了 / 看起来不对劲"立即采集证据
-
-**证据包**（每条 bug 都至少收集）：
-
-| 维度 | 工具 | 要点 |
-|------|------|------|
-| 现象描述 | 用户原话 | 一句话 + 复现触发条件 |
-| DOM 状态 | `read_page`, `javascript_tool` | 关注按钮 disabled/pointerEvents/opacity/事件监听 |
-| Console 错误 | `read_console_messages --pattern 'error\|warn\|Error'` | 只留 error/warn，不要全量 |
-| 网络异常 | `read_network_requests --urlPattern '<接口前缀>'` | 找 4xx/5xx/pending |
-| 截图 | 让用户 cmd+shift+4 截图到 `.context/attachments/`，或 `mcp__chrome-devtools__take_screenshot` | 报错场景必附；UX 类带"当前 vs 期望"更佳 |
-| 代码层根因 | `gh api`/本地 grep | 有源码就看，找到按钮启用条件/API 路径/props gate |
-
-证据齐了之后进 Phase 4。
+**Tool pitfalls:**
+- `javascript_tool` may throw `Cannot access a chrome-extension:// URL of different extension` when page loads cross-extension iframes (e.g. Geetest). Fall back to `read_page` + reading source.
+- `read_console_messages` / `read_network_requests` need to be listening from page load — refresh once before reading.
+- Don't use `chrome-devtools` MCP debug features simultaneously — they'll conflict with claude-in-chrome for Debugger protocol access.
 
 ---
 
-## Phase 4: 每条 bug 的提交
+## Phase 3: Accompany Testing Loop
 
-详细规程见 `references/submit-bug-sop.md`。**高层步骤**（不要跳过）：
+User operates manually. Agent does two things:
 
-1. **查重**（必做，见 SOP 第 2 节）
-   - 搜 bitable + GitHub issue（含 closed）+ GitHub PR（含 merged）
-   - 命中后按 5 类处置：完全相同 / 已修复的 regression / 正在修的 PR / 相关但不同 / 无关联
-   - 把对比表发给用户，等指令再动作——**无命中也要确认**
+1. **Passive observation**: don't drive the user, don't click randomly
+2. **On-demand support**: when user says "there's a problem / can't click / error / looks wrong", immediately collect evidence
 
-2. **定优先级**（见 SOP 第 3 节）
-   - 能从现象推断 → 直接填 + 简述理由
-   - 推断不了 → `AskUserQuestion` 弹 P0/P1/P2 三选项让用户选
-   - **严禁**默认填 P1 或凭空猜
+**Evidence package** (collect for every bug):
 
-3. **上传截图到 R2**（见 SOP 第 4 节）
+| Dimension | Tool | Key Points |
+|-----------|------|------------|
+| Phenomenon description | User's own words | One sentence + reproduction trigger |
+| DOM state | `read_page`, `javascript_tool` | Check disabled / pointerEvents / opacity / event listeners |
+| Console errors | `read_console_messages --pattern 'error\|warn\|Error'` | Keep only error/warn, not everything |
+| Network anomalies | `read_network_requests --urlPattern '<api-prefix>'` | Look for 4xx/5xx/pending |
+| Screenshots | Ask user cmd+shift+4 to `.context/attachments/`, or `mcp__chrome-devtools__take_screenshot` | Required for error scenes; for UX issues, "current vs expected" is better |
+| Code root cause | `gh api` / local grep | If source is available, find button enable conditions / API paths / props gates |
+
+Once evidence is complete, proceed to Phase 4.
+
+---
+
+## Phase 4: Per-Bug Submission
+
+Detailed procedure in `references/submit-bug-sop.md`. **High-level steps** (don't skip):
+
+1. **Dedup** (mandatory, see SOP Section 2)
+   - Search Bitable + GitHub issues (including closed) + GitHub PRs (including merged)
+   - On hit, apply 5-category disposition: identical / fixed regression / in-progress PR / related but different / unrelated
+   - Show comparison table to user, wait for instruction — **confirm even when no hit**
+
+2. **Assign priority** (see SOP Section 3)
+   - If inferable from symptoms → fill directly + brief rationale
+   - If not inferable → `AskUserQuestion` with P0/P1/P2 options
+   - **Never** default to P1 or guess randomly
+
+3. **Upload screenshot to R2** (see SOP Section 4)
    ```
    upload-img <local-path>
-   # 返回 https://pub-a9416c5573a34388b8d9465d8bef4257.r2.dev/YYYYMMDD/filename
+   # Returns https://pub-a9416c5573a34388b8d9465d8bef4257.r2.dev/YYYYMMDD/filename
    ```
 
-4. **写飞书多维表格**
-   - `+record-upsert` 必填：问题标题 / 问题描述 / 问题分类 / 优先级 / 状态(=待确认) / 提交人
-   - `+record-upload-attachment` 把截图挂到 示例图 字段（**不能**塞进 upsert）
+4. **Write to Feishu Bitable**
+   - `+record-upsert` required: issue title / description / category / priority / status (=pending confirmation) / submitter
+   - `+record-upload-attachment` attach screenshot to the "Example image" field (**do not** stuff into upsert)
 
-5. **创建 GitHub issue**
-   - 标题：`[Bug]: <一句话>` 或 `[Feature]: <一句话>`（根据问题分类）
-   - 正文按 `CherryHQ/cherry-studio#14338` 格式：英文正文在前（含翻译声明）、中文原文用 `<details>` 折叠、截图用 R2 URL 以 `<img src="...">` 嵌入
-   - 打标签：问题分类 = Bug → `type: bug`；= 体验优化 → `type: feature`
+5. **Create GitHub issue**
+   - Title: `[Bug]: <one sentence>` or `[Feature]: <one sentence>` (based on category)
+   - Body follows `CherryHQ/cherry-studio#14338` format: English body first (with translation disclaimer), Chinese original collapsed in `<details>`, screenshots embedded as `<img src="...">` with R2 URLs
+   - Labels: category = Bug → `type: bug`; = UX improvement → `type: feature`
 
-6. **回报**：把 record_id、issue URL、bitable URL 三个链接一并给用户，外加一句总结"标题 / 分类 / 优先级 / 状态"
-
----
-
-## Phase 5: 回到 Phase 3
-
-用户继续测。每提一条 bug 就走一遍 Phase 4。
-
-用户说"收工 / 测完了 / 今天到这 / 暂停"→ 输出本次 session 汇总：建了几条 record，几个 issue，有哪些 regression / 正在修的 PR 被识别，总共花了多久。
+6. **Report back**: give user record_id, issue URL, and Bitable URL together, plus a summary: "title / category / priority / status"
 
 ---
 
-## 参考文件
+## Phase 5: Return to Phase 3
 
-- `references/bitable-bases.md` — 已知 Base token / 表 ID / 字段 ID / 选项枚举、跨 Base 的字段命名约定
-- `references/submit-bug-sop.md` — 详细提交协议（查重 5 类处置、优先级规则、值格式、R2 上传、issue 模板）
+User continues testing. Every bug report goes through Phase 4.
+
+When user says "done / finished / pause for today / stop" → output session summary: how many records created, how many issues filed, which regressions / in-progress PRs were identified, total time spent.
+
+---
+
+## Reference Files
+
+- `references/bitable-bases.md` — Known Base tokens / table IDs / field IDs / enum values, cross-base field naming conventions
+- `references/submit-bug-sop.md` — Detailed submission protocol (5 dedup categories, priority rules, value formats, R2 upload, issue template)

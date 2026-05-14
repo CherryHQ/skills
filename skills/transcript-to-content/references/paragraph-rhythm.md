@@ -31,11 +31,11 @@ Alternate between short and medium paragraphs. Avoid consecutive long paragraphs
 
 ```
 ✅ Good rhythm:
-短 → 短 → 中 → 短 → 长 → 短 → 短 → 中
+short → short → medium → short → long → short → short → medium
 (Feels like: breathe-breathe-read-breathe-deep read-breathe-breathe-read)
 
 ❌ Bad rhythm:
-长 → 长 → 长 → 中 → 长
+long → long → long → medium → long
 (Feels like: wall of text, reader drowns)
 ```
 
@@ -43,17 +43,17 @@ Alternate between short and medium paragraphs. Avoid consecutive long paragraphs
 
 1. **Never stack 3+ long paragraphs (60+ chars) consecutively** — insert a short paragraph (under 30 chars) as a breathing point between them
 2. **After a long paragraph (80+ chars), the next paragraph should be short (under 40 chars)** — give the reader a break
-3. **Key transitions and emphasis deserve their own short paragraph** — even a single sentence like "但问题来了。" or "答案是算力。" standing alone creates powerful rhythm
+3. **Key transitions and emphasis deserve their own short paragraph** — even a single sentence like "But here's the thing." or "The answer is compute." standing alone creates powerful rhythm
 4. **Opening paragraph can be medium or long** — first paragraph earns more patience; subsequent paragraphs must earn attention
 
 ## Short Paragraph Techniques
 
 Short paragraphs (1-20 chars) that stand alone are powerful tools:
 
-- **Transitional short sentences**: "讲个故事。" / "答案其实很简单。" / "但事情没那么简单。"
-- **Emphasis punchlines**: "它的名字叫 Figure AI。" / "人生不是刚性的。"
-- **Rhetorical questions**: "因为你想，货币是什么？" / "那下一个时代呢？"
-- **Single-word/phrase answers**: "信。" / "就是做取舍。"
+- **Transitional short sentences**: "Here's a story." / "The answer is simple." / "But it's not that simple."
+- **Emphasis punchlines**: "Its name is Figure AI." / "Life isn't rigid."
+- **Rhetorical questions**: "Because think about it, what is money?" / "So what's next?"
+- **Single-word/phrase answers**: "Yes." / "It's about trade-offs."
 
 These create natural pauses and emphasis — the textual equivalent of a speaker pausing for effect.
 
@@ -65,45 +65,49 @@ When a paragraph exceeds 80 chars, apply these splitting strategies:
 
 ```
 ❌ Before (110 chars):
-投资这件事本质上看的是人，因为市场变化太快了，你很难准确预判事情
-会怎么发展，而且还叠加各种竞争和地缘政治问题，在这种无穷的变化
-里，唯一相对不变的就是创始人。
+Investing is fundamentally about people, because markets change 
+too fast. It's hard to accurately predict how things will develop, 
+plus there's competition and geopolitics. In this endless change, 
+the only relatively constant thing is the founder.
 
 ✅ After (3 paragraphs):
-我觉得人更重要了。
+I think people matter more now.
 
-因为 AI 变化太快了。你很难准确预判事情怎么发展，而且还叠加各种
-竞争、各种地缘政治之类的问题。
+Because AI changes too fast. It's hard to accurately predict how 
+things develop, plus there's competition and geopolitics.
 
-在无穷的变化里，唯一相对不变的就是创始人。
+In this endless change, the only relatively constant thing is 
+the founder.
 ```
 
 ### Strategy 2: Extract the conclusion as standalone
 
 ```
 ❌ Before (90 chars):
-很多时候选择太多反而就不珍惜眼下，如果这一生只能做一件事你会做
-什么，所以生活里做一点减法对我的帮助非常大。
+Too many choices often make you not cherish the present. If you 
+could only do one thing in life, what would it be? So doing some 
+subtraction in life helps me a lot.
 
 ✅ After:
-很多时候选择太多，反而就不珍惜眼下。
+Too many choices often make you not cherish the present.
 
-如果这一生只能做一件事，你会做什么？
+If you could only do one thing in life, what would it be?
 
-所以生活里做一点减法，对我的帮助非常大。
+So doing some subtraction in life helps me a lot.
 ```
 
 ### Strategy 3: Pull out the rhetorical question
 
 ```
 ❌ Before (85 chars):
-那 AI 毫无疑问是当下最有价值的命题，什么是泡沫呢，泡沫讲的是价
-值和价格之间的关系。
+AI is undoubtedly the most valuable proposition right now. What 
+is a bubble? A bubble is about the relationship between value 
+and price.
 
 ✅ After:
-什么是泡沫？
+What is a bubble?
 
-泡沫讲的是价值和价格之间的关系。
+A bubble is about the relationship between value and price.
 ```
 
 ## Self-Check After Writing
@@ -117,4 +121,4 @@ After completing a piece (social post or article section), do a rhythm scan:
 
 ## Data Source
 
-These guidelines are derived from analyzing high-readability WeChat articles (e.g., 42章经), where the average paragraph is ~35 chars, 65% of paragraphs are under 40 chars, and no paragraph exceeds 120 chars. The core insight: mobile readers need frequent visual breaks — paragraph boundaries serve as breathing points.
+These guidelines are derived from analyzing high-readability WeChat articles (e.g., 42章经 / 42 Chapters), where the average paragraph is ~35 chars, 65% of paragraphs are under 40 chars, and no paragraph exceeds 120 chars. The core insight: mobile readers need frequent visual breaks — paragraph boundaries serve as breathing points.

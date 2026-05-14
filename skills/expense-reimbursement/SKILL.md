@@ -1,41 +1,41 @@
 ---
 name: expense-reimbursement
-description: 处理费用报销的完整生命周期：单张发票录入暂存、批量汇总生成报销草稿、审批流转、台账与报表。当用户提到报销、费用、发票、差旅报销、审批流程、或者需要整理/校验/审批费用记录时触发。也适用于用户需要录入发票、报销看板、台账或合规检查的场景。
+description: Full lifecycle expense reimbursement: single invoice intake and staging, batch aggregation to generate reimbursement drafts, approval workflow, ledger and dashboard. Trigger when user mentions reimbursement, expenses, invoices, travel reimbursement, approval workflow, or needs to organize / verify / approve expense records. Also applies when user needs to enter invoices, view reimbursement dashboards, ledgers, or compliance checks.
 ---
 
-# 费用报销
+# Expense Reimbursement
 
-## 概览
+## Overview
 
 ```
-单张发票录入（暂存） → 批量汇总（草稿+审批） → 台账与看板（报表）
+Single invoice intake (staging) → Batch aggregation (draft + approval) → Ledger & Dashboard (reports)
 ```
 
-## 交互原则
+## Interaction Principles
 
-- **默认执行，出错才问**：收到发票后自动完成解析、写入、上传，除非关键字段缺失或配置缺失才中断。
-- **结果导向**：完成后直接展示"已保存"摘要，不出现"待确认"等中间状态。
-- **配置优先**：使用参考文件中已配置的 Base token，不向用户重复索要。
-
----
-
-## 内置脚本
-
-发票录入的所有 Base 操作由 `scripts/invoice_intake.py` 完成，**不要手动拼接 lark-cli 命令**。
-
-- **AI 负责：** 解析发票、判断费用类型、生成事由说明
-- **脚本负责：** 用户身份、Base 定位、时间戳转换、查重、写入、附件上传
-
-详见 `references/invoice-intake.md` 步骤 4。
+- **Default to execute, ask only on error**: after receiving an invoice, auto-complete parsing, writing, and uploading. Only interrupt if critical fields are missing or config is missing.
+- **Results-oriented**: after completion, show a "saved" summary directly. No intermediate "pending confirmation" states.
+- **Config-first**: use the Base token already configured in reference files. Do not ask user for it repeatedly.
 
 ---
 
-## 路由规则
+## Built-in Scripts
 
-| 用户场景 | 读取文件 |
-|---------|---------|
-| 提交发票，先录入暂存 | `references/invoice-intake.md` |
-| 月底批量汇总、生成报销草稿、发起审批 | `references/batch-reimbursement.md` |
-| 查看台账、统计报表、预算分析 | `references/ledger-dashboard.md` |
+All invoice intake Base operations are handled by `scripts/invoice_intake.py`. **Do not manually construct lark-cli commands.**
 
-意图模糊时直接询问：「您是想先录入暂存，还是现在整理成报销单提交审批？」
+- **AI handles:** parsing invoice, determining expense type, generating reason description
+- **Script handles:** user identity, Base location, timestamp conversion, dedup, writing, attachment upload
+
+See `references/invoice-intake.md` Step 4 for details.
+
+---
+
+## Routing Rules
+
+| User Scenario | Read File |
+|---------------|-----------|
+| Submit an invoice, stage it first | `references/invoice-intake.md` |
+| End-of-month batch aggregation, generate reimbursement draft, initiate approval | `references/batch-reimbursement.md` |
+| View ledger, summary reports, budget analysis | `references/ledger-dashboard.md` |
+
+When intent is unclear, ask: "Do you want to stage an invoice first, or organize and submit a reimbursement form for approval now?"

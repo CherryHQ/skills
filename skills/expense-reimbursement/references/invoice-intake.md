@@ -1,74 +1,74 @@
-# 发票录入（单张提交暂存）
+# Invoice Intake (Single Submission — Staging)
 
-用户场景：录入单张或多张发票暂存，不立即生成报销申请。
+User scenario: enter one or multiple invoices for staging, do not immediately generate a reimbursement application.
 
 ---
 
-## 工作流
+## Workflow
 
-### 1. 读取输入
+### 1. Read Input
 
-支持：图片（照片/截图）、PDF（电子发票/扫描件）、文本（口述或粘贴）。
+Supports: images (photo/screenshot), PDF (e-invoice/scan), text (dictated or pasted).
 
-如用户未提供任何内容，询问："请上传发票图片或 PDF，或者告诉我发票信息。"
+If user provides no content, ask: "Please upload an invoice image or PDF, or tell me the invoice information."
 
-### 2. 解析与提取
+### 2. Parse & Extract
 
-从发票中提取：
+Extract from invoice:
 
-| 字段 | 说明 |
-|------|------|
-| 发票号码 | 必填 |
-| 发生日期 | 必填，YYYY-MM-DD |
-| 报销金额 | 必填，价税合计 |
-| 不含税金额 | 必填 |
-| 税额 | 可选，无则传 0 |
-| 报销类型 | 必填，见下方类型映射 |
-| 事由说明 | 必填，简短描述 |
-| 附件路径 | 发票文件本地路径 |
+| Field | Description |
+|-------|-------------|
+| Invoice Number | Required |
+| Date | Required, YYYY-MM-DD |
+| Amount | Required, total including tax |
+| Pre-tax Amount | Required |
+| Tax | Optional, default 0 if missing |
+| Expense Type | Required, see type mapping below |
+| Description | Required, short description |
+| Attachment Path | Invoice file local path |
 
-**类型映射：** 餐厅/外卖 → 餐饮（内部）或招待（客户接待）；高铁/机票 → 差旅；打车/地铁 → 交通。
+**Type Mapping:** Restaurant/delivery → Dining (internal) or Entertainment (client); train/plane → Travel; taxi/subway → Transportation.
 
-### 3. 解析校验
+### 3. Validation
 
-| 检查项 | 处理策略 |
-|--------|----------|
-| **必填缺失** | 发生日期/报销金额无法识别 → ❌ 询问用户补充 |
-| **非关键缺失** | 税额缺失/类型模糊 → ⚠️ AI 推断后继续，摘要中注明 |
+| Check | Handling Strategy |
+|-------|------------------|
+| **Required missing** | Date/Amount unrecognizable → ❌ Ask user to supplement |
+| **Non-critical missing** | Tax missing / type ambiguous → ⚠️ AI infers and continues, note in summary |
 
-> 重复发票检查由脚本完成（exit code 2），AI 无需预先查 Base。
+> Duplicate invoice check is handled by script (exit code 2), AI does not need to pre-query Base.
 
-### 4. 调用脚本写入
+### 4. Call Script to Write
 
 ```bash
-cd <发票文件所在目录>
+cd <invoice-file-directory>
 uv run <skill_path>/scripts/invoice_intake.py \
-  --invoice-number "<发票号码>" \
+  --invoice-number "<invoice-number>" \
   --invoice-date "<YYYY-MM-DD>" \
-  --amount <价税合计> \
-  --pretax-amount <不含税金额> \
-  --tax <税额> \
-  --expense-type "<报销类型>" \
-  --description "<事由说明>" \
-  --file "./<文件名>"
+  --amount <total-amount> \
+  --pretax-amount <pre-tax-amount> \
+  --tax <tax> \
+  --expense-type "<expense-type>" \
+  --description "<description>" \
+  --file "./<filename>"
 ```
 
-脚本处理：用户身份获取、Base 定位、时间戳转换、查重、记录写入、附件上传。
+Script handles: user identity, Base location, timestamp conversion, dedup, record write, attachment upload.
 
-**退出码：**
-- `0` — 成功，stdout 输出 JSON（含 `record_id`）
-- `2` — 发票号重复，告知用户后询问是否覆盖
+**Exit codes:**
+- `0` — Success, stdout outputs JSON (includes `record_id`)
+- `2` — Duplicate invoice number, inform user and ask whether to overwrite
 
-### 5. 汇报结果
+### 5. Report Result
 
 ```
-✅ 已录入并保存到个人报销表
+✅ Entered and saved to personal reimbursement table
 
-| 发票号 | 商户 | 报销金额 | 不含税金额 | 税额 | 类型 | 状态 |
-|--------|------|----------|-----------|------|------|------|
-| 261... | 北京道久... | ¥94.00 | ¥93.07 | ¥0.93 | 餐饮 | 待审批 |
+| Invoice # | Merchant | Amount | Pre-tax Amount | Tax | Type | Status |
+|-----------|----------|--------|---------------|------|------|--------|
+| 261... | Beijing Daojiu... | ¥94.00 | ¥93.07 | ¥0.93 | Dining | Pending Approval |
 
-附件：已上传至「发票凭证」字段
+Attachment: uploaded to "Invoice Document" field
 
-如需整理报销，请说"帮我报销"。
+To organize reimbursement, say "help me reimburse".
 ```

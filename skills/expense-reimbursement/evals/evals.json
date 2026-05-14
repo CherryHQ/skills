@@ -3,44 +3,44 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "上传了一张打车发票，先帮我存着",
-      "expected_output": "读取 references/invoice-intake.md，解析发票字段，展示单条录入记录，标记为暂存，提示后续可统一整理报销",
+      "prompt": "Uploaded a taxi receipt, save it for me first",
+      "expected_output": "Read references/invoice-intake.md, parse invoice fields, display single intake record, mark as staged, prompt that reimbursement can be organized later",
       "files": []
     },
     {
       "id": 2,
-      "prompt": "3月5号请客户吃饭花了268，商户是海底捞，发票号 987654321",
-      "expected_output": "读取 references/invoice-intake.md，解析为结构化记录，类型=招待，展示确认，暂存，询问是否继续录入",
+      "prompt": "On March 5th, treated a client to dinner for 268 at Haidilao, invoice number 987654321",
+      "expected_output": "Read references/invoice-intake.md, parse into structured record, type=Entertainment, display confirmation, stage, ask whether to continue entering",
       "files": []
     },
     {
       "id": 3,
-      "prompt": "帮我整理这个月的报销，之前录入的那些发票",
-      "expected_output": "读取 references/batch-reimbursement.md，读取所有暂存记录，汇总分类，校验，生成草稿供确认，然后生成审批包",
+      "prompt": "Help me organize this month's reimbursement, those invoices I entered before",
+      "expected_output": "Read references/batch-reimbursement.md, read all staged records, aggregate by category, validate, generate draft for confirmation, then generate approval package",
       "files": []
     },
     {
       "id": 4,
-      "prompt": "把出差那几天的发票一起报了吧，高铁、酒店、客户吃饭",
-      "expected_output": "读取 references/batch-reimbursement.md，按差旅/住宿/招待分类汇总，生成完整草稿和审批包",
+      "prompt": "Submit those invoices from the business trip together: train, hotel, client dinner",
+      "expected_output": "Read references/batch-reimbursement.md, aggregate by Travel/Accommodation/Entertainment, generate complete draft and approval package",
       "files": []
     },
     {
       "id": 5,
-      "prompt": "主管说招待费超标了，帮我改改再提",
-      "expected_output": "读取 references/batch-reimbursement.md，定位超标招待费用，提出拆单或调整成本中心方案，生成修订草稿",
+      "prompt": "Manager said entertainment expense was over limit, help me fix and resubmit",
+      "expected_output": "Read references/batch-reimbursement.md, locate over-limit entertainment, propose split-order or cost-center adjustment, generate revised draft",
       "files": []
     },
     {
       "id": 6,
-      "prompt": "汇总一下这个月的报销，做个看板",
-      "expected_output": "读取 references/ledger-dashboard.md，生成费用趋势、类型分布、部门对比，内联 Markdown 表格",
+      "prompt": "Summarize this month's reimbursement, make a dashboard",
+      "expected_output": "Read references/ledger-dashboard.md, generate expense trend, category distribution, department comparison, inline Markdown tables",
       "files": []
     },
     {
       "id": 7,
-      "prompt": "看看 Q1 预算执行情况，哪些超了",
-      "expected_output": "读取 references/ledger-dashboard.md，预算 vs 实际表格，标注超支项，异常分析",
+      "prompt": "See Q1 budget execution, what's over budget",
+      "expected_output": "Read references/ledger-dashboard.md, budget vs actual table, flag over-budget items, anomaly analysis",
       "files": []
     }
   ]

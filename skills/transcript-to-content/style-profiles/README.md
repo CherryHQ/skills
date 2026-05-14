@@ -9,11 +9,11 @@ This directory stores persistent writing style profiles. Once saved, the skill a
 
 ## Creating a Profile
 
-Tell Claude: "帮我保存风格" or "save my style profile" and provide 2-5 reference posts. Claude will analyze and save the profile here.
+Tell Claude: "save my style profile" and provide 2-5 reference posts. Claude will analyze and save the profile here.
 
 ## Updating a Profile
 
-Tell Claude: "更新我的风格" or "update my style" with new reference posts.
+Tell Claude: "update my style" with new reference posts.
 
 ## Profile Format
 

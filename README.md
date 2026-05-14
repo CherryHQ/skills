@@ -1,58 +1,59 @@
-# Cherry Studio · 内部 Skills
+# Cherry Studio Skills
 
-这是 **Cherry Studio 团队内部共享的 Claude Code skills 仓库**。不限定某个产品线——Cherry Studio 客户端、Cherry Studio Enterprise、各类内部工具、日常工作流程，任何能被 skill 封装并提效的场景都欢迎进来。
+A shared Claude Code skills repository for the Cherry Studio team. Not tied to any single product line — Cherry Studio desktop client, Cherry Studio Enterprise, internal tools, day-to-day workflows. If a workflow can be packaged as a skill, it belongs here.
 
-> 👐 **欢迎大家把自己磨出来的好 skill 上传到这里。**
-> 一份好 skill = 一次把工作流琢磨透 + 让全团队以后都省一次事。小到「整理周报」「改文案」，大到「系统测试协作」「代码审查」，都值得沉淀。
+> 👐 **Everyone is welcome to contribute skills they've refined.**
+> A good skill = one person figures out the workflow + the whole team saves time forever. Everything from "write my weekly report" and "polish copy" to "system testing collaboration" and "code review" is worth capturing.
 
-结构参考 [anthropics/skills](https://github.com/anthropics/skills)。
-
----
-
-## 当前 Skills
-
-| Skill | 用途 | 典型触发词 |
-|-------|------|------|
-| [test-and-report](skills/test-and-report/) | 陪用户手动测 staging，按规范把 bug 落到飞书多维表格 + GitHub issue 双轨 | `test and report` / `边测边报` / `开始系统测试` / `帮我测 cherry / express saas` / 贴飞书测试文档 + bitable |
-| [prd-creator](skills/prd-creator/) | 跟 PM 讨论 cherry-studio 社区版需求 → 出中英对照 PRD review → 用户确认后建英文 GitHub issue（CherryHQ/cherry-studio）+ 自动加入 Project #3 + 设字段 | `建需求单` / `把这个需求建到 GitHub` / `新建 feature issue` / `draft an issue for...` |
-| [transcript-to-content](skills/transcript-to-content/) | 把转录稿 / 会议录音 / 原始笔记转成可发布内容：多条社交帖子 或 单篇长文。自动核查专有名词、数字、ASR 误转，长稿走索引检索策略防止编造 | `写成文章` / `整理成一篇文章` / `把转录稿转成文档` / `把这个录音整理成帖子` / `write up this session` / `turn this talk into a blog post` |
-
-_（请持续补充）_
+Structure follows [anthropics/skills](https://github.com/anthropics/skills).
 
 ---
 
-## 适用范围
+## Current Skills
 
-| 场景 | 举例 |
-|------|------|
-| 产品相关工作流 | 客户端/SaaS 测试、发版、PR 审查、文档协作 |
-| 研发流程 | Issue 分诊、PRD 写作、代码审查、release notes 生成 |
-| 运营/市场/PM | 周报、会议纪要、公众号排版、飞书群通知 |
-| 日常办公 | 邮件起草、日程整理、飞书多维表格自动化 |
-| 新人上手 | 环境配置向导、内部 repo 权限申请、knowledge-base 索引 |
+| Skill | Purpose | Typical Triggers |
+|-------|---------|------------------|
+| [test-and-report](skills/test-and-report/) | Accompany users through manual staging testing, file bugs to a Feishu Bitable + GitHub issue dual-track system | `test and report` / `start system testing` / `help me test cherry / express saas` / paste Feishu test doc + bitable |
+| [prd-creator](skills/prd-creator/) | Discuss a Cherry Studio community-edition requirement with PM → produce a bilingual PRD review → after user confirmation, create the English GitHub issue (CherryHQ/cherry-studio) + auto-add to Project #3 + set fields | `create requirement` / `draft an issue` / `new feature issue` / `draft an issue for...` |
+| [transcript-to-content](skills/transcript-to-content/) | Turn transcripts, meeting recordings, or raw notes into publishable content: multiple social posts or a single long-form article. Auto-verifies proper nouns, numbers, and ASR errors; long articles use an index-retrieval strategy to prevent hallucination | `write an article` / `turn this talk into a blog post` / `write up this session` / `convert transcript` |
+| [expense-reimbursement](skills/expense-reimbursement/) | Full lifecycle expense reimbursement: single invoice intake, batch aggregation, approval workflow, ledger and dashboard | `expense` / `invoice` / `reimbursement` / `submit expense` |
 
-只要你反复做、每次都略有卡顿的事，就是一个 skill 候选。
+_(Keep adding to this table.)_
 
 ---
 
-## 安装（三选一）
+## Use Cases
 
-### 方式 1：symlink 单个 skill（推荐）
+| Scenario | Examples |
+|----------|----------|
+| Product workflows | Client / SaaS testing, releases, PR review, doc collaboration |
+| Engineering workflows | Issue triage, PRD writing, code review, release notes generation |
+| Ops / Marketing / PM | Weekly reports, meeting notes, WeChat post formatting, Feishu group notifications |
+| Daily office work | Email drafting, schedule organizing, Feishu Bitable automation |
+| Onboarding | Environment setup guides, internal repo access requests, knowledge-base indexing |
 
-最轻量。克隆仓库后，把目标 skill 软链接到 `~/.claude/skills/`：
+If you do it repeatedly and it's slightly painful every time, it's a skill candidate.
+
+---
+
+## Installation (pick one)
+
+### Option 1: Symlink a single skill (recommended)
+
+Lightweight. Clone the repo, then symlink the skill you want into `~/.claude/skills/`:
 
 ```bash
-cd ~/code  # 你平时放代码的地方
-git clone git@github.com:CherryInternal/skills.git
+cd ~/code  # wherever you keep code
+git clone git@github.com:CherryHQ/skills.git
 cd skills
 
-# 单独启用某个 skill
+# Enable a specific skill
 ln -s "$(pwd)/skills/test-and-report" ~/.claude/skills/test-and-report
 ```
 
-后续 `git pull` 就能同步最新版本。
+Updates come through `git pull`.
 
-### 方式 2：symlink 全部
+### Option 2: Symlink all skills
 
 ```bash
 cd ~/code/skills
@@ -62,62 +63,62 @@ for skill in skills/*/; do
 done
 ```
 
-### 方式 3：复制（不跟随更新）
+### Option 3: Copy (no auto-updates)
 
 ```bash
 cp -R skills/test-and-report ~/.claude/skills/
 ```
 
-装完在 Claude Code / Conductor 里用触发词直接调用。
+After installation, invoke the skill in Claude Code / Conductor using its trigger phrases.
 
 ---
 
-## 前置依赖（多数 skill 会用到）
+## Prerequisites (most skills need these)
 
-| 能力 | 检查 | 缺失时 |
-|------|------|------|
-| `lark-cli` | `lark-cli contact +get-user` 能返回当前用户 | 找内部 onboarding 文档按 `lark-shared` 指引认证 |
-| `gh` CLI | `gh auth status` 已登录且有目标 repo 写权限 | `gh auth login` + 让 org admin 加你到相应 repo |
-| `upload-img`（Cloudflare R2 图床） | `which upload-img` 返回 `~/.local/bin/upload-img` | 向内部运维索取脚本，或改走手动上传 |
-| `claude-in-chrome` 扩展（陪测 / 浏览器类 skill） | Chrome 菜单里有 Claude 图标并 Connect 成功 | [claude.com/chrome](https://claude.com/chrome) 下载安装 |
-
----
-
-## 添加新 Skill（欢迎 PR ❤️）
-
-1. **本地实现并用几次** —— 先在 `~/.claude/skills/<name>/` 里做，跑顺了再沉淀
-2. **放到 `skills/<name>/`** —— 目录名 = SKILL.md frontmatter 里的 `name`
-3. **至少要有 `SKILL.md`**，YAML frontmatter 必含 `name` + `description`（description 是触发逻辑的核心）
-4. **可选**：`references/`（长篇规程/配置）、`scripts/`（可执行）、`assets/`（模板/图标等）
-5. **在本 README 的「当前 Skills」表格里加一行**
-6. 提 PR
-
-**心法**（少踩坑）：
-- 用 Anthropic 的 `skill-creator` skill 起草 + 优化 description，触发命中率会高很多
-- SKILL.md 控制在 500 行内；超长内容拆到 `references/`，SKILL.md 里用链接指过去
-- 描述里写清楚"**什么时候用**"和"**什么时候不用**"（反向清单能有效防止误触发）
-- 如果 skill 引用了 base_token / 私有 repo 名 / 内部 URL，留意保密范围（本仓库 private 一份没事，但不要拷到公开仓库）
-
-**不确定选题？** 常见高价值方向：
-- 把自己手工做 5 次以上的流程固化（写周报、改 schema、回邮件）
-- 把团队反复问的"怎么做 X"沉淀成可调用的 skill
-- 给某个外部 CLI / API 包一层便利层
+| Capability | Check | If Missing |
+|------------|-------|------------|
+| `lark-cli` | `lark-cli contact +get-user` returns current user | Follow internal onboarding docs for `lark-shared` auth |
+| `gh` CLI | `gh auth status` shows logged in with write access to target repos | `gh auth login` + ask org admin to add you to repos |
+| `upload-img` (Cloudflare R2 image hosting) | `which upload-img` returns `~/.local/bin/upload-img` | Ask internal ops for the script, or use manual upload as fallback |
+| `claude-in-chrome` extension (for testing / browser skills) | Claude icon visible in Chrome menu and shows "Connected" | Install from [claude.com/chrome](https://claude.com/chrome) |
 
 ---
 
-## 协作约定
+## Adding a New Skill (PRs welcome ❤️)
 
-- **命名**：kebab-case，动词优先（`test-and-report`、`doc-review`、`wechat-crm`）
-- **变更**：PR 走 review，merge 走 squash
-- **废弃**：不用的 skill 打上 `description` 里加 `[DEPRECATED]` 前缀，而不是直接删——给同事留反应时间
-- **更新破坏性变更**：CHANGELOG 写一下，触发词改了记得在 PR 描述里 flag
+1. **Prototype locally first** — build it in `~/.claude/skills/<name>/`, iterate until it works smoothly
+2. **Drop it in `skills/<name>/`** — directory name must match the `name` in SKILL.md frontmatter
+3. **Must include `SKILL.md`** with YAML frontmatter containing `name` + `description` (description is the core of trigger logic)
+4. **Optional**: `references/` (long procedures / configs), `scripts/` (executables), `assets/` (templates / icons)
+5. **Add a row to the "Current Skills" table** in this README
+6. Open a PR
+
+**Tips** (fewer surprises):
+- Use Anthropic's `skill-creator` skill to draft + optimize descriptions — trigger accuracy improves significantly
+- Keep SKILL.md under 500 lines; long content goes into `references/`, linked from SKILL.md
+- Write clearly "**when to use**" and "**when NOT to use**" in the description (negative lists prevent false triggers)
+- If a skill references base_tokens / private repo names / internal URLs, be mindful of confidentiality (this repo is private, but don't copy to public repos)
+
+**Not sure what to build?** High-value directions:
+- Package any workflow you've done 5+ times manually (weekly reports, schema changes, email replies)
+- Turn team FAQs of "how do I do X" into callable skills
+- Wrap an external CLI / API with a convenience layer
 
 ---
 
-## 保密提醒
+## Collaboration Conventions
 
-本仓库是 **internal / private**。skill 内可能包含 staging token、内部 repo 名、客户数据表结构、账号 open_id 等敏感信息。
+- **Naming**: kebab-case, verb-first (`test-and-report`, `doc-review`, `wechat-crm`)
+- **Changes**: PRs go through review, merges use squash
+- **Deprecation**: Mark unused skills with `[DEPRECATED]` in their description rather than deleting — gives teammates time to adjust
+- **Breaking changes**: Write a CHANGELOG entry; if trigger phrases change, flag it in the PR description
 
-- ❌ 不要把 skill 拷贝到公开仓库
-- ❌ 不要在公开渠道（X / 公众号 / 博客）整段引用 skill 里的配置块
-- ✅ 可以在内部飞书 / 内部文档里分享、讨论、抄作业
+---
+
+## Confidentiality Notice
+
+This is an **internal / private** repository. Skills may contain staging tokens, internal repo names, customer data schemas, account open_ids, and other sensitive information.
+
+- ❌ Do NOT copy skills to public repositories
+- ❌ Do NOT quote skill configuration blocks verbatim on public channels (X / WeChat / blogs)
+- ✅ Sharing, discussing, and learning from skills inside the company is encouraged

@@ -1,128 +1,128 @@
-# Bug 提交 SOP（多维表格 + GitHub issue 双轨）
+# Bug Submission SOP (Bitable + GitHub Issue Dual-Track)
 
-本文档是 `cherry-test-session` skill Phase 4 的详细规程。每条 bug 都必须完整执行所有 6 个环节，顺序不能颠倒。
-
----
-
-## 1. 入口前置条件
-
-进入本 SOP 之前，确保已经有一个"证据包"：
-
-- 现象一句话（用户原话）
-- 触发条件 / 复现步骤
-- 环境信息（OS / 浏览器 / 版本 / 登录状态）
-- 至少一项客观证据（截图 / Console 错误 / 网络请求 / DOM state）
-- （可选）代码层根因
-
-证据不齐 → 先回 Phase 3 补齐，不要带着半拉证据进 SOP。
+This document is the detailed procedure for the `test-and-report` skill Phase 4. Every bug must complete all 6 steps in order, without skipping.
 
 ---
 
-## 2. 查重（必做，5 类处置）
+## 1. Entry Prerequisites
 
-### 2.1 提取关键词
+Before entering this SOP, ensure you have an "evidence package":
 
-从现象里挑最具体的 2-3 个关键词（报错码、组件名、函数名、文件路径、关键堆栈），**不要**用整句话搜。
+- One-sentence symptom description (user's own words)
+- Trigger conditions / reproduction steps
+- Environment info (OS / browser / version / login status)
+- At least one piece of objective evidence (screenshot / Console error / network request / DOM state)
+- (Optional) code-level root cause
 
-### 2.2 搜索 3 个地方
+If evidence is incomplete → return to Phase 3 to fill gaps. Do NOT enter the SOP with partial evidence.
 
-**① 飞书多维表格**：
+---
+
+## 2. Dedup (Mandatory, 5-Category Disposition)
+
+### 2.1 Extract Keywords
+
+Pick the most specific 2-3 keywords from the symptom (error code, component name, function name, file path, key stack trace). **Do NOT** search with the full sentence.
+
+### 2.2 Search 3 Sources
+
+**① Feishu Bitable:**
 ```
-lark-cli base +record-search --base-token <BASE> --table-id <TABLE> --json '{"keyword":"<关键词>","search_fields":["问题标题","问题描述","备注"],"limit":20}'
+lark-cli base +record-search --base-token <BASE> --table-id <TABLE> --json '{"keyword":"<keyword>","search_fields":["Issue Title","Issue Description","Notes"],"limit":20}'
 ```
 
-**② GitHub issue（open + closed 都要查）**：
+**② GitHub issues (open + closed):**
 ```
-gh issue list --repo <OWNER/REPO> --search '<关键词>' --state all --limit 20
-```
-
-**③ GitHub PR（open + merged 都要查）**：
-```
-gh pr list --repo <OWNER/REPO> --search '<关键词>' --state all --limit 10
+gh issue list --repo <OWNER/REPO> --search '<keyword>' --state all --limit 20
 ```
 
-### 2.3 按 5 类处置
+**③ GitHub PRs (open + merged):**
+```
+gh pr list --repo <OWNER/REPO> --search '<keyword>' --state all --limit 10
+```
 
-并排对比（现象 / 触发条件 / 平台 / 版本），归类到其中一类：
+### 2.3 Apply 5-Category Disposition
 
-| 判断 | 证据特征 | 处置动作 |
-|------|---------|---------|
-| **完全相同的 open 条目** | 现象+触发条件+平台几乎一致，issue/record 未关闭 | **不要新建**。告诉用户「已有 #xxx / record <id>」，询问是追加信息还是取消 |
-| **已修复的相同 Issue**（closed `✅fixed`） | 现象一致但 issue 已关闭且带修复标签 | **可能是回归 bug**。告诉用户「#xxx 在 vX.X 已修复但现象重现，可能是 regression」，等用户决定是新建还是在旧 issue 补充 |
-| **正在修复的 PR**（open 或 已合并未发布） | PR 明确引用了相关代码/issue，且未发布到当前环境 | 告诉用户「PR #yyy 已经在修，预计 vX.X 发布」；用户可选：新建跟踪条目、先等发版、或在 PR 下评论 |
-| **相关但不同** | 现象近似但触发条件/模块/影响范围有明显差异 | 可以新建，但**必须双向引用**（bitable 备注里 `见 #xxx`、issue 正文里 `Related: #xxx`） |
-| **无关联** | 搜索无命中 | 正常走第 3 节 |
+Compare side-by-side (symptom / trigger / platform / version), classify into one:
 
-### 2.4 输出格式
+| Verdict | Evidence | Action |
+|---------|----------|--------|
+| **Identical open entry** | Symptom+trigger+platform nearly identical, issue/record not closed | **Do NOT create new**. Tell user "already tracked in #xxx / record <id>", ask whether to append info or cancel |
+| **Fixed issue regression** (closed `✅fixed`) | Symptom identical but issue closed with fix label | **Possible regression**. Tell user "#xxx was fixed in vX.X but symptom reappears — possible regression", wait for user to decide: create new or append to old issue |
+| **In-progress PR** (open or merged but not released) | PR clearly references related code/issue, not yet in current environment | Tell user "PR #yyy is already in progress, expected vX.X"; user can: create tracking entry, wait for release, or comment on the PR |
+| **Related but different** | Symptom similar but trigger/module/impact clearly different | Can create new, but **must cross-reference** (Bitable note `see #xxx`, issue body `Related: #xxx`) |
+| **Unrelated** | No search hits | Proceed to Section 3 normally |
 
-搜完后发给用户一张汇总表：
+### 2.4 Output Format
+
+After searching, present a summary table to the user:
 
 ```
-关联搜索结果：
+Related search results:
 
 Bitable:
-| record_id | 标题 | 状态 | 关系 |
-| ...       | ...  | ...  | ...  |
+| record_id | Title | Status | Relation |
+| ...       | ...   | ...    | ...      |
 
 GitHub Issue:
-| #   | 标题 | 状态 | 关系 |
-| ... | ...  | ...  | ...  |
+| #   | Title | Status | Relation |
+| ... | ...   | ...    | ...      |
 
 GitHub PR:
-| #   | 标题 | 状态 | 关系 |
-| ... | ...  | ...  | ...  |
+| #   | Title | Status | Relation |
+| ... | ...   | ...    | ...      |
 
-建议：{新建 | 追加到现有 | 先等 PR 发布}
-理由：...
+Recommendation: {Create new | Append to existing | Wait for PR release}
+Rationale: ...
 ```
 
-**铁律**：任何情况都先把表和建议展示给用户，**等明确指令才动作**。即使搜索无命中，也要问「未找到关联，确认新建？」不要自己判断直接建。
+**Iron rule**: Show the table and recommendation to the user in all cases, **wait for explicit instruction before acting**. Even if no hits, ask "No related entries found. Confirm creating new?" — never decide unilaterally.
 
 ---
 
-## 3. 定优先级（P0 / P1 / P2）
+## 3. Assign Priority (P0 / P1 / P2)
 
-### 3.1 三档定义
+### 3.1 Three-Tier Definitions
 
-| 档 | 定义 | 处理节奏 |
-|----|------|---------|
-| **P0** | 主路径阻塞 / 功能根本不可用 / 数据丢失 / 安全漏洞 | **必须立即改完** |
-| **P1** | 比较严重的体验问题，主路径仍能走通但明显受损 | 后续马上处理（当前迭代内） |
-| **P2** | 小的体验问题 / 非常低频遇到的问题 | 可以延后处理（排进队列） |
+| Tier | Definition | Response Time |
+|------|-----------|---------------|
+| **P0** | Main path blocked / feature completely broken / data loss / security flaw | **Must fix immediately** |
+| **P1** | Serious experience issue, main path still works but clearly degraded | Fix soon (current sprint) |
+| **P2** | Minor experience issue / very infrequent edge case | Queue for later |
 
-### 3.2 判断规则
+### 3.2 Decision Rules
 
-1. **能从现象推断**（用户已说"走不通"、"崩溃"、"数据丢失" 等强信号）→ 直接填 + 在 Phase 4 Step 6 回报时简述理由方便用户推翻
-2. **推断不了** → **必须**用 `AskUserQuestion` 弹 P0/P1/P2 三选项，问题文案：
+1. **Inferable from symptom** (user said "can't proceed", "crash", "data lost", etc.) → fill directly + briefly explain in Phase 4 Step 6 report so user can override
+2. **Not inferable** → **must** use `AskUserQuestion` with P0/P1/P2 options, prompt text:
 
-   > 这条 bug 的优先级是？
-   > - P0：主路径阻塞，必须立即改完
-   > - P1：比较严重的体验问题，后续马上处理
-   > - P2：小的体验问题 / 非常低频遇到的问题
+   > What's the priority of this bug?
+   > - P0: Main path blocked, must fix immediately
+   > - P1: Serious experience issue, fix soon
+   > - P2: Minor issue / infrequent edge case, queue for later
 
-3. **严禁**默认填 P1 或凭空猜——会污染统计和排期
+3. **Strictly forbidden** to default to P1 or guess randomly — pollutes metrics and scheduling
 
 ---
 
-## 4. 上传截图到 Cloudflare R2
+## 4. Upload Screenshots to Cloudflare R2
 
 ```bash
 upload-img <local-path-to-screenshot>
-# 返回 https://pub-a9416c5573a34388b8d9465d8bef4257.r2.dev/YYYYMMDD/<filename>
+# Returns https://pub-a9416c5573a34388b8d9465d8bef4257.r2.dev/YYYYMMDD/<filename>
 ```
 
-- 脚本位置：`~/.local/bin/upload-img`
-- Bucket：`screenshots`
-- Key 格式：`YYYYMMDD/<原文件名>`（自动加日期前缀）
-- 返回的是**公开 URL**，直接嵌入 GitHub issue 或分享
+- Script location: `~/.local/bin/upload-img`
+- Bucket: `screenshots`
+- Key format: `YYYYMMDD/<original-filename>` (date prefix auto-added)
+- Returns a **public URL**, embed directly in GitHub issue or share
 
-多张图分多次上传，拿到的 URL 逐个嵌入 issue 正文。
+Upload images one at a time, embed URLs in issue body individually.
 
 ---
 
-## 5. 写飞书多维表格
+## 5. Write to Feishu Bitable
 
-### 5.1 创建 record
+### 5.1 Create Record
 
 ```bash
 lark-cli base +record-upsert \
@@ -131,64 +131,64 @@ lark-cli base +record-upsert \
   --json '<record_json>'
 ```
 
-**必填字段**：
+**Required fields**:
 
-| 字段 | 值格式 | 示例 |
-|------|--------|------|
-| 问题标题 | text (≤40 字摘要) | `"登录页发送验证码按钮首次加载禁用"` |
-| 问题描述 | text（多行，含现象+环境+步骤+影响） | `"现象: ...\n环境: ...\n步骤: 1) ... 2) ..."` |
-| 问题分类 | select 单选 | `"Bug"` 或 `"体验优化"` |
-| 优先级 | select 单选 | `"P0"` / `"P1"` / `"P2"` |
-| 状态 | select 单选 | **新提交默认 `"待确认"`**，不要擅自改后续态 |
-| 提交人 | user | `[{"id":"ou_xxxxxx"}]`，通过 `lark-cli contact +get-user --jq .data.user.open_id` 取当前用户 |
+| Field | Value Format | Example |
+|-------|-------------|---------|
+| Issue Title | text (≤40 chars summary) | `"Login page send-code button disabled on first load"` |
+| Issue Description | text (multi-line, symptom+env+steps+impact) | `"Symptom: ...\nEnvironment: ...\nSteps: 1) ... 2) ..."` |
+| Issue Category | select (single) | `"Bug"` or `"UX Improvement"` |
+| Priority | select (single) | `"P0"` / `"P1"` / `"P2"` |
+| Status | select (single) | **New submissions default `"Pending Confirmation"`** — don't change to later states |
+| Submitter | user | `[{"id":"ou_xxxxxx"}]`, obtained via `lark-cli contact +get-user --jq .data.user.open_id` |
 
-**选填字段**：`模块`（Cherry Studio 客户端有 17 个 option，Express SaaS 暂只有"其他"）/ `Issue`（URL，写 `[#xxx](url)` 格式，表格只显示 #xxx 短超链接）/ `负责人`（人员）/ `备注`（多行）/ `示例图`（**不要塞进这里**，见下）
+**Optional fields**: `Module` (Cherry Studio desktop has 17 options, Express SaaS currently only "Other") / `Issue` (URL, write as `[#xxx](url)` format, table shows #xxx short link) / `Owner` (user) / `Notes` (multi-line) / `Example Image` (**don't put here**, see below)
 
-**不要写**：`创建时间`（系统自动）
+**Do NOT write**: `Created At` (system auto)
 
-### 5.2 值格式速查
+### 5.2 Value Format Quick Reference
 
-| 字段类型 | JSON 值 |
-|---------|---------|
-| text | `"字符串"`（支持 `\n` 换行） |
-| select 单选 | `"P0"`（字符串，精确匹配 option name） |
+| Field Type | JSON Value |
+|-----------|------------|
+| text | `"string"` (supports `\n` newlines) |
+| select (single) | `"P0"` (string, exact match to option name) |
 | user | `[{"id":"ou_xxx"}]` |
-| text(url) | 推荐 `"[#129](https://.../issues/129)"` — 列内只显示 #129 可点；也接受纯 URL `"https://..."` |
-| attachment | **走独立接口** `+record-upload-attachment` |
-| created_at / updated_at | 不写 |
+| text(url) | Recommended `"[#129](https://.../issues/129)"` — column shows clickable #129; also accepts plain URL `"https://..."` |
+| attachment | **Use separate API** `+record-upload-attachment` |
+| created_at / updated_at | Do not write |
 
-### 5.3 上传附件
+### 5.3 Upload Attachments
 
-**不能**塞进 upsert。拿到 record_id 之后单独调用：
+**Cannot** go through upsert. After getting record_id, call separately:
 
 ```bash
 lark-cli base +record-upload-attachment \
   --base-token <BASE> \
   --table-id <TABLE> \
   --record-id <record_id> \
-  --field-id <示例图 field_id> \
+  --field-id <example_image_field_id> \
   --file <local-path> \
-  --name <display-name>   # 可选，默认用文件名
+  --name <display-name>   # optional, defaults to filename
 ```
 
-多张图分多次调用。
+Call once per image.
 
-### 5.4 坑点
+### 5.4 Pitfalls
 
-- `jq` 取 record_id 的路径是 `.data.record.record_id_list[0]`，**不是** `.data.record.record_id`（为 null）
-- 单选值精确匹配大小写（`"p0"` 不行，必须 `"P0"`）
-- 人员字段用 `{id: ...}` 包裹的数组，不是裸字符串
+- `jq` path for record_id is `.data.record.record_id_list[0]`, **not** `.data.record.record_id` (which is null)
+- Single-select values are case-sensitive (`"p0"` fails, must be `"P0"`)
+- User fields use `{id: ...}` wrapped in array, not bare string
 
 ---
 
-## 6. 创建 GitHub issue
+## 6. Create GitHub Issue
 
-### 6.1 标题格式
+### 6.1 Title Format
 
-- 问题分类 = Bug → `[Bug]: <一句话问题摘要>`
-- 问题分类 = 体验优化 → `[Feature]: <一句话改进摘要>` 或 `[Enhancement]: <...>`
+- Category = Bug → `[Bug]: <one-sentence summary>`
+- Category = UX Improvement → `[Feature]: <one-sentence improvement summary>` or `[Enhancement]: <...>`
 
-### 6.2 正文格式（参考 `CherryHQ/cherry-studio#14338`）
+### 6.2 Body Format (follow `CherryHQ/cherry-studio#14338`)
 
 ```markdown
 > [!NOTE]
@@ -249,7 +249,7 @@ lark-cli base +record-upload-attachment \
 ---
 
 <details>
-<summary>原始中文内容 (Original Content)</summary>
+<summary>Original Chinese Content</summary>
 
 ### 现象
 ...
@@ -269,7 +269,7 @@ lark-cli base +record-upload-attachment \
 </details>
 ```
 
-### 6.3 创建命令
+### 6.3 Create Command
 
 ```bash
 gh issue create --repo <OWNER/REPO> \
@@ -277,35 +277,35 @@ gh issue create --repo <OWNER/REPO> \
   --body-file <path-to-body.md>
 ```
 
-### 6.4 打标签
+### 6.4 Add Labels
 
-**先看 repo 现有 label**，再决定用什么——不要凭空套 `type:*` 命名空间：
+**Check repo's existing labels first**, then decide what to use — don't invent `type:*` namespaces blindly:
 
 ```bash
 gh label list --repo <OWNER/REPO> --limit 100
 ```
 
-按优先级挑 label：
+Priority for label selection:
 
-1. **复用已有 label**：repo 里有 `bug` / `feature` / `BUG` / `enhancement` 这类语义对应的 label，直接用。
+1. **Reuse existing label**: if repo has `bug` / `feature` / `BUG` / `enhancement` with matching semantics, use it directly.
    ```bash
    gh issue edit <N> --repo <OWNER/REPO> --add-label "<existing>"
    ```
-2. **没有语义对应**时才建新的：
+2. **Only create new when no semantic match**:
    ```bash
    gh label create "type: bug" --color "d73a4a" --description "Functional defect (bitable: Bug)" --repo <OWNER/REPO>
-   gh label create "type: feature" --color "0366d6" --description "UX improvement (bitable: 体验优化)" --repo <OWNER/REPO>
+   gh label create "type: feature" --color "0366d6" --description "UX improvement (bitable: UX Improvement)" --repo <OWNER/REPO>
    ```
 
-**已知仓库约定**：
-- `CherryHQ/cherry-studio`（公开）：用老体系 `BUG`/`feature`/`P1`-`P3`，不要建 `type:*`。
-- `CherryInternal/cherry-studio-enterprise-api`：当前实际使用 `bug` / `feature`（见 #135）。新建 `type:*` 前先 `gh label list` 确认没有语义重复的 label。
+**Known repo conventions**:
+- `CherryHQ/cherry-studio` (public): uses legacy `BUG`/`feature`/`P1`-`P3`, do NOT create `type:*`.
+- `CherryInternal/cherry-studio-enterprise-api`: currently uses `bug` / `feature` (see #135). Check `gh label list` before creating `type:*`.
 
-**优先级 label**（可选）：
-- CherryHQ 有现成 `P1` / `P2` / `P3` label，bitable 的 P0/P1/P2 映射到 P1/P2/P3 或单独加 `P0`。
-- enterprise-api 目前无优先级 label，需要的话同样 `gh label list` 确认后再建。
+**Priority labels** (optional):
+- CherryHQ has existing `P1` / `P2` / `P3` labels. Bitable P0/P1/P2 map to P1/P2/P3 or add `P0` separately.
+- enterprise-api currently has no priority labels; check `gh label list` before creating.
 
-### 6.5 回填 Issue URL 到 bitable
+### 6.5 Backfill Issue URL to Bitable
 
 ```bash
 lark-cli base +record-upsert \
@@ -317,34 +317,34 @@ lark-cli base +record-upsert \
 
 ---
 
-## 7. 回报给用户
+## 7. Report Back to User
 
-固定格式：
+Fixed format:
 
 ```
-✅ 已提交
+✅ Submitted
 
-标题: <问题标题>
-分类: <Bug | 体验优化>  优先级: <P0 | P1 | P2>  状态: 待确认
+Title: <issue title>
+Category: <Bug | UX Improvement>  Priority: <P0 | P1 | P2>  Status: Pending Confirmation
 record_id: <rec_xxx>
 Issue: <GitHub issue URL>
 Bitable: <base URL?table=tbl_xxx>
 
-（若有）优先级判断理由: <一句话>
+(Priority rationale if applicable): <one sentence>
 ```
 
-失败时透出错误码 + 原始 error message，不要隐藏。
+On failure, expose error code + raw error message. Do not hide it.
 
 ---
 
-## 8. 常见错误速查
+## 8. Common Errors Quick Reference
 
-| 错误 | 原因 | 处理 |
-|------|------|------|
-| `[800004135] OpenAPI* limited` | 飞书接口限流 | `sleep 2-5` 后重试，连发加间隔 |
-| `[1254045]` 字段名不存在 | option name 拼错（`p0` vs `P0`） | `+field-list` 看真实 option |
-| `[1254066]` 人员字段错误 | 直接写字符串或忘记 `{id: ...}` | 改为 `[{"id":"ou_xxx"}]` |
-| 写入成功但示例图空 | 附件不能走 upsert | 用 `+record-upload-attachment` |
-| `gh label create` 404 | 没 triage/write 权限 | 让用户给当前 GH 账号加权限 |
-| `gh issue create` 成功但无 label | 同上 | 先建好 label 再重试 `edit --add-label` |
-| JS tool `Cannot access a chrome-extension:// URL of different extension` | 页面有跨扩展 iframe (Geetest 等) | 降级：`read_page` + 看源码 |
+| Error | Cause | Fix |
+|-------|-------|-----|
+| `[800004135] OpenAPI* limited` | Feishu API rate limit | `sleep 2-5` then retry, add delay between consecutive calls |
+| `[1254045]` field name doesn't exist | Option name typo (`p0` vs `P0`) | `+field-list` to check actual option names |
+| `[1254066]` user field error | Wrote plain string or forgot `{id: ...}` | Change to `[{"id":"ou_xxx"}]` |
+| Write succeeded but example image empty | Attachments can't go through upsert | Use `+record-upload-attachment` |
+| `gh label create` 404 | No triage/write permission | Ask user to grant permission to current GH account |
+| `gh issue create` succeeded but no label | Same as above | Create label first, then retry `edit --add-label` |
+| JS tool `Cannot access a chrome-extension:// URL of different extension` | Page has cross-extension iframe (Geetest etc.) | Fall back: `read_page` + read source |

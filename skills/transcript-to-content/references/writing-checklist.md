@@ -9,9 +9,9 @@ Before outputting any piece, verify:
 ✅ If you delete any sentence, does the logic break? (If not broken, delete it)
 ✅ Do cases serve the theme? (If not, delete them)
 ✅ Are there specific data and cases? (If too abstract, add details)
-✅ **Is structure invisible?** (Critical for Jike)
+✅ **Is structure invisible?** (Critical for social feeds)
    - Logic flows naturally without forced sections?
-   - No excessive bold subheadings (**小标题**)?
+   - No excessive bold subheadings?
    - No numbered lists (1. 2. 3.) unless user's style uses them?
    - Reads like feed content, not like article?
 
@@ -23,7 +23,7 @@ Before outputting any piece, verify:
 
 ### Tone & Style
 ✅ Does it have a clear attitude? (Don't be too hedged)
-✅ Is it preachy? (Delete "建议/应该/recommend/should")
+✅ Is it preachy? (Delete "recommend/should/suggest")
 ✅ Does the tone match user's style?
 ✅ Is the length appropriate? (Deleted everything possible)
 
@@ -37,7 +37,7 @@ Before outputting any piece, verify:
 ### 2. Don't Preach Excessively
 - Provide frameworks, don't "teach people how to live"
 - Share observations, don't prescribe solutions
-- Avoid: "你应该...", "建议...", "最好..."
+- Avoid: "you should...", "recommend...", "best to..."
 - Prefer: Direct observations and logical reasoning
 
 ### 3. Don't Pile Up Cases
@@ -52,14 +52,14 @@ Before outputting any piece, verify:
 
 ### 5. Don't Ignore Data
 - Specific numbers > abstract descriptions
-- "3亿美金 vs 10亿人民币" > "增长很快"
-- "工作两年以上不看" > "偏好年轻人"
+- "$300M vs ¥1B revenue" > "growing fast"
+- "2+ years experience not considered" > "prefers young people"
 - Data creates credibility and impact
 
 ### 6. Don't Be Too Formal
 - Have attitude, don't hedge
 - Make clear judgments
-- "我操" is fine if it matches user's style
+- Casual profanity is fine if it matches user's style
 - Avoid corporate-speak and platitudes
 
 ## Style Matching
@@ -72,14 +72,14 @@ Before outputting any piece, verify:
 
 Pay attention to:
 - Information density (data-heavy / case-heavy / opinion-heavy)
-- Emotional words (克制 / 直接 / 幽默)
+- Emotional words (restrained / direct / humorous)
 - Paragraph length (short punchy sentences vs longer explanations)
 - Opening style (direct statement / question / story / data)
 
 ### When User Doesn't Provide Reference
 
 Base on the raw content's language characteristics:
-- **If raw content is casual, emotional** → Keep it casual, preserve "我操/卧槽"
+- **If raw content is casual, emotional** → Keep it casual, preserve profanity if present
 - **If raw content is professional, rational** → Stay measured, use data and cases
 - **If raw content is conversational** → Can keep dialogue format, more authentic
 - **If raw content is structured notes** → Extract into structured viewpoints
@@ -123,14 +123,14 @@ When writing articles (not social posts), check these instead:
 
 ### Polish
 ✅ Every paragraph advances the narrative?
-✅ No redundant transitions ("接下来我们来看...")?
+✅ No redundant transitions ("next let's look at...")?
 ✅ Facts verified per section via Grep?
 ✅ Data points confirmed against transcript?
 ✅ ASR homophone sweep done? (beyond proper nouns — check homophones, word boundaries, English transliterations)
-✅ Speaker attribution thinned? (max 2-3 "X说/X认为" per section, not every paragraph)
+✅ Speaker attribution thinned? (max 2-3 "X says/X thinks" per section, not every paragraph)
 ✅ Tool/product descriptions compressed? (1-2 sentences of core value, not feature walkthroughs)
 ✅ Specific dates replaced with relative time where appropriate?
-✅ Jargon abbreviations normalized to full terms? (RD→研发, PM→产品经理)
+✅ Jargon abbreviations normalized to full terms? (e.g., RD → Engineering, PM → Product Manager)
 ✅ Terminology consistent throughout? (pick one term, use it everywhere)
 
 ## Common Weaknesses to Avoid
@@ -138,8 +138,8 @@ When writing articles (not social posts), check these instead:
 ### Both Modes
 1. **Meandering opening** - Get to the point immediately
 2. **Circular logic** - Make sure each point advances the argument
-3. **Empty superlatives** - "非常好/特别棒" without specifics
-4. **Hedging too much** - "可能/也许/似乎" weakens impact
+3. **Empty superlatives** - "very good / amazing" without specifics
+4. **Hedging too much** - "maybe/perhaps/seems" weakens impact
 5. **Obvious statements** - Don't state what everyone already knows
 6. **Missing the 'so what'** - Always connect observation to insight
 
@@ -151,6 +151,6 @@ When writing articles (not social posts), check these instead:
 9. **Meta-commentary** - Describing session mechanics instead of presenting content
 10. **Flat heading hierarchy** - 8+ first-level headings instead of grouping into narrative arcs
 11. **Tool walkthrough transcription** - Copying the speaker's feature-by-feature demo narration instead of distilling to 1-2 sentences of core value
-12. **ASR homophones left uncorrected** - Transcripts contain systematic mishearings beyond proper nouns: homophones (市值→价值), word boundaries (可以呀用→可以用), phonetic English transliterations (Figma妹→Figma Make)
-13. **Specific dates that don't matter** - Using "2026年3月11日" when "周三" suffices. Dates age the article; prefer relative time unless the date is newsworthy
-14. **Jargon abbreviations** - Using insider abbreviations (RD, PM) instead of full terms (研发, 产品经理). Normalize terminology to one consistent form throughout
+12. **ASR homophones left uncorrected** - Transcripts contain systematic mishearings beyond proper nouns: homophones (market cap → value), word boundaries (can use → can use), phonetic English transliterations ("Figma妹" → "Figma Make")
+13. **Specific dates that don't matter** - Using "March 11, 2026" when "Wednesday" suffices. Dates age the article; prefer relative time unless the date is newsworthy
+14. **Jargon abbreviations** - Using insider abbreviations (RD, PM) instead of full terms (Engineering, Product Manager). Normalize terminology to one consistent form throughout
