@@ -15,6 +15,7 @@
 |-------|------|------|
 | [test-and-report](skills/test-and-report/) | 陪用户手动测 staging，按规范把 bug 落到飞书多维表格 + GitHub issue 双轨 | `test and report` / `边测边报` / `开始系统测试` / `帮我测 cherry / express saas` / 贴飞书测试文档 + bitable |
 | [prd-creator](skills/prd-creator/) | 跟 PM 讨论 cherry-studio 社区版需求 → 出中英对照 PRD review → 用户确认后建英文 GitHub issue（CherryHQ/cherry-studio）+ 自动加入 Project #3 + 设字段 | `建需求单` / `把这个需求建到 GitHub` / `新建 feature issue` / `draft an issue for...` |
+| [transcript-to-content](skills/transcript-to-content/) | 把转录稿 / 会议录音 / 原始笔记转成可发布内容：多条社交帖子 或 单篇长文。自动核查专有名词、数字、ASR 误转，长稿走索引检索策略防止编造 | `写成文章` / `整理成一篇文章` / `把转录稿转成文档` / `把这个录音整理成帖子` / `write up this session` / `turn this talk into a blog post` |
 
 _（请持续补充）_
 
