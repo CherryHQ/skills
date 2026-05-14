@@ -142,7 +142,7 @@ lark-cli base +record-upsert \
 | Status | select (single) | **New submissions default `"Pending Confirmation"`** — don't change to later states |
 | Submitter | user | `[{"id":"ou_xxxxxx"}]`, obtained via `lark-cli contact +get-user --jq .data.user.open_id` |
 
-**Optional fields**: `Module` (Cherry Studio desktop has 17 options, Express SaaS currently only "Other") / `Issue` (URL, write as `[#xxx](url)` format, table shows #xxx short link) / `Owner` (user) / `Notes` (multi-line) / `Example Image` (**don't put here**, see below)
+**Optional fields**: `Module` (Desktop App has 17 options, SaaS Platform currently only "Other") / `Issue` (URL, write as `[#xxx](url)` format, table shows #xxx short link) / `Owner` (user) / `Notes` (multi-line) / `Example Image` (**don't put here**, see below)
 
 **Do NOT write**: `Created At` (system auto)
 
@@ -188,7 +188,7 @@ Call once per image.
 - Category = Bug → `[Bug]: <one-sentence summary>`
 - Category = UX Improvement → `[Feature]: <one-sentence improvement summary>` or `[Enhancement]: <...>`
 
-### 6.2 Body Format (follow `CherryHQ/cherry-studio#14338`)
+### 6.2 Body Format (follow `<OWNER>/<REPO>#<ISSUE_NUMBER>`)
 
 ```markdown
 > [!NOTE]
@@ -298,12 +298,12 @@ Priority for label selection:
    ```
 
 **Known repo conventions**:
-- `CherryHQ/cherry-studio` (public): uses legacy `BUG`/`feature`/`P1`-`P3`, do NOT create `type:*`.
-- `CherryInternal/cherry-studio-enterprise-api`: currently uses `bug` / `feature` (see #135). Check `gh label list` before creating `type:*`.
+- `<OWNER>/<REPO>` (public): uses legacy `BUG`/`feature`/`P1`-`P3`, do NOT create `type:*`.
+- `<OWNER>/<REPO>`: currently uses `bug` / `feature` (see #135). Check `gh label list` before creating `type:*`.
 
 **Priority labels** (optional):
-- CherryHQ has existing `P1` / `P2` / `P3` labels. Bitable P0/P1/P2 map to P1/P2/P3 or add `P0` separately.
-- enterprise-api currently has no priority labels; check `gh label list` before creating.
+- <OWNER> has existing `P1` / `P2` / `P3` labels. Bitable P0/P1/P2 map to P1/P2/P3 or add `P0` separately.
+- <REPO> currently has no priority labels; check `gh label list` before creating.
 
 ### 6.5 Backfill Issue URL to Bitable
 

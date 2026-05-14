@@ -1,9 +1,9 @@
 ---
 name: test-and-report
-description: Manual testing + bug filing for Cherry Studio / Cherry Studio Enterprise (Express SaaS). Parses a Feishu test doc (scope + repo + bitable URL), observes staging via claude-in-chrome, captures DOM/console/network/screenshot evidence, then dual-tracks each finding — Feishu Bitable record (with attachments) + GitHub issue (CherryHQ#14338 format — English-primary, Chinese collapsed, R2-hosted screenshots, matching type label). Enforces dedup across bitable + GitHub issues + PRs, and mandatory P0/P1/P2 priority prompt when unclear. Trigger whenever the user says "test and report", "test and report side-by-side", "start system testing", "help me test cherry / express saas", "experience staging", "collaborate on bug filing", "collect feedback", a shared Feishu testing doc, a bitable URL + finding, or any UX/bug needing both bitable + GitHub tracking. Do NOT use for writing Cherry Studio code, PR review, CI debugging, or general "how do I use Cherry Studio" questions — those go to normal dev / PR-review / support flows.
+description: Manual testing + bug filing for Enterprise / SaaS products. Parses a Feishu test doc (scope + repo + bitable URL), observes staging via claude-in-chrome, captures DOM/console/network/screenshot evidence, then dual-tracks each finding — Feishu Bitable record (with attachments) + GitHub issue (<REPO>#<ISSUE_NUMBER> format — English-primary, Chinese collapsed, R2-hosted screenshots, matching type label). Enforces dedup across bitable + GitHub issues + PRs, and mandatory P0/P1/P2 priority prompt when unclear. Trigger whenever the user says "test and report", "test and report side-by-side", "start system testing", "experience staging", "collaborate on bug filing", "collect feedback", a shared Feishu testing doc, a bitable URL + finding, or any UX/bug needing both bitable + GitHub tracking. Do NOT use for writing product code, PR review, CI debugging, or general "how do I use this product" questions — those go to normal dev / PR-review / support flows.
 ---
 
-# Cherry Test & Report
+# Test & Report
 
 A skill that packages the full flow: "Feishu test doc → browser evidence capture → dual-track submission (Bitable + GitHub issue)" so every piece of feedback includes environment info, screenshots, dedup conclusion, and priority, tracked in two systems.
 
@@ -16,10 +16,10 @@ A skill that packages the full flow: "Feishu test doc → browser evidence captu
 - User sends a known test Bitable URL (e.g. `IJQPbTzZhaObMQsuL5OcbaoBnag` / `AdeDbC9VgaNkrEsXtk5cTMarn2e`) with feedback
 
 **Do NOT use this skill:**
-- User asks you to write Cherry Studio code / open a PR → use normal dev flow
+- User asks you to write product code / open a PR → use normal dev flow
 - User asks you to review an existing PR → use `gh-pr-review` skill
 - CI / build failure debugging → use normal debugging
-- User asks "how do I use Cherry Studio / where do I download" → general answer
+- User asks "how do I use this product / where do I download" → general answer
 
 ---
 
@@ -63,8 +63,8 @@ Use these signals to determine which product, and therefore which repo + Bitable
 
 | Signal | Product | Repository | Bitable |
 |--------|---------|------------|---------|
-| URL contains `cse-admin-staging.cherry-ai.com` / `cherry-studio-enterprise-api` / "Express SaaS" / "Enterprise" | **Cherry Studio Enterprise** | `CherryInternal/cherry-studio-enterprise-api` | `IJQPbTzZhaObMQsuL5OcbaoBnag` / `tbl20SIk4B78Ydpg` |
-| Mentions "client" / "desktop" / `github.com/CherryHQ/cherry-studio` / Electron | **Cherry Studio Desktop** | `CherryHQ/cherry-studio` | `AdeDbC9VgaNkrEsXtk5cTMarn2e` / `tbl7eUvrbfM7XFqg` |
+| URL contains `cse-admin-staging.cherry-ai.com` / `enterprise-api` / "SaaS" / "Enterprise" | **Enterprise / SaaS** | `<ENTERPRISE_REPO>` | `IJQPbTzZhaObMQsuL5OcbaoBnag` / `tbl20SIk4B78Ydpg` |
+| Mentions "client" / "desktop" / Electron | **Desktop Client** | `<DESKTOP_REPO>` | `AdeDbC9VgaNkrEsXtk5cTMarn2e` / `tbl7eUvrbfM7XFqg` |
 | Neither clear | Ask user | — | — |
 
 Known config details (field IDs, enum values, view shortcuts) are in `references/bitable-bases.md`.
@@ -136,7 +136,7 @@ Detailed procedure in `references/submit-bug-sop.md`. **High-level steps** (don'
 
 5. **Create GitHub issue**
    - Title: `[Bug]: <one sentence>` or `[Feature]: <one sentence>` (based on category)
-   - Body follows `CherryHQ/cherry-studio#14338` format: English body first (with translation disclaimer), Chinese original collapsed in `<details>`, screenshots embedded as `<img src="...">` with R2 URLs
+   - Body follows generic issue format: English body first (with translation disclaimer), Chinese original collapsed in `<details>`, screenshots embedded as `<img src="...">` with R2 URLs
    - Labels: category = Bug → `type: bug`; = UX improvement → `type: feature`
 
 6. **Report back**: give user record_id, issue URL, and Bitable URL together, plus a summary: "title / category / priority / status"

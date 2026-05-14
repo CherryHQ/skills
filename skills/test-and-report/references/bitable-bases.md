@@ -1,11 +1,11 @@
 # Known Bitable Configurations
 
-## Cherry Studio Desktop (Client) System Testing
+## [Product A] (Desktop Client) System Testing
 
 - **base_token**: `AdeDbC9VgaNkrEsXtk5cTMarn2e`
 - **Main table table_id** (Test Issues): `tbl7eUvrbfM7XFqg`
 - **URL**: https://mcnnox2fhjfq.feishu.cn/base/AdeDbC9VgaNkrEsXtk5cTMarn2e
-- **GitHub repo**: `CherryHQ/cherry-studio` (public)
+- **GitHub repo**: `<org-a>/<repo-client>` (public)
 
 ### Field IDs
 
@@ -14,7 +14,7 @@
 | Issue Title | text | `fldNrOaPGd` | Primary field |
 | Issue Description | text | `fldPLm4WIR` | Multi-line |
 | Example Image | attachment | `fld7RbjUJg` | **Upload separately** |
-| Module | select | `fldJnWKno4` | 17 Cherry Studio categories |
+| Module | select | `fldJnWKno4` | 17 product categories |
 | Issue Category | select | `fldDdSGUOn` | Bug / UX Improvement |
 | Priority | select | `fldNeu8G9i` | P0 / P1 / P2 |
 | Status | select | `fldhPJ0Uh8` | Pending Confirmation / Confirmed / In Progress / Fixed / Verified / Deferred / Won't Fix |
@@ -26,13 +26,13 @@
 
 ---
 
-## Cherry Studio Enterprise (Express SaaS Staging)
+## [Product B] (Express SaaS Staging)
 
 - **base_token**: `IJQPbTzZhaObMQsuL5OcbaoBnag`
 - **Main table table_id** (Issue Collection): `tbl20SIk4B78Ydpg`
 - **URL**: https://mcnnox2fhjfq.feishu.cn/wiki/PkuVwDh42iQB3bkLGEdcndVJnuf?table=tbl20SIk4B78Ydpg
-- **Staging URL**: https://cse-admin-staging.cherry-ai.com
-- **GitHub repo**: `CherryInternal/cherry-studio-enterprise-api` (private, frontend in `apps/admin/`, current dev branch `saas`)
+- **Staging URL**: https://<staging-domain>
+- **GitHub repo**: `<org-b>/<repo-saas-api>` (private, frontend in `apps/portal/`, current dev branch `saas`)
 
 ### Field IDs
 

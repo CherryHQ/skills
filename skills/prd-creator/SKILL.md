@@ -1,11 +1,11 @@
 ---
 name: prd-creator
-description: Discuss a Cherry Studio community-edition product requirement with the user, draft a bilingual (Chinese + English) PRD for review, then — after explicit user approval — create the English-only issue on GitHub (CherryHQ/cherry-studio). Use whenever the user wants to turn a requirement (from a Feishu doc, a meeting note, a customer ask, or a rough idea) into a GitHub issue. Triggers on phrases like "create requirement doc", "create a requirement", "put this requirement on GitHub", "create new feature issue", "draft an issue for...", or anytime the user describes a Cherry Studio feature/improvement they want tracked. The format is opinionated (Background / Goal / Spec / Verification / Related, NO implementation details, draft shown bilingually for human review, issue itself written in English only).
+description: Discuss a community-edition product requirement with the user, draft a bilingual (Chinese + English) PRD for review, then — after explicit user approval — create the English-only issue on GitHub (<OWNER/REPO>). Use whenever the user wants to turn a requirement (from a Feishu doc, a meeting note, a customer ask, or a rough idea) into a GitHub issue. Triggers on phrases like "create requirement doc", "create a requirement", "put this requirement on GitHub", "create new feature issue", "draft an issue for...", or anytime the user describes a product feature/improvement they want tracked. The format is opinionated (Background / Goal / Spec / Verification / Related, NO implementation details, draft shown bilingually for human review, issue itself written in English only).
 ---
 
-# Cherry Studio Requirement Issue (PRD)
+# Product Requirement Issue (PRD)
 
-This skill helps a PM and an AI agent collaborate on a Cherry Studio requirement, draft it bilingually for review, and only then publish the English version as a GitHub issue. The issues are read by both human developers and Claude Code, so the body sticks to product logic plus concrete verification cases — **never implementation details**.
+This skill helps a PM and an AI agent collaborate on a product requirement, draft it bilingually for review, and only then publish the English version as a GitHub issue. The issues are read by both human developers and Claude Code, so the body sticks to product logic plus concrete verification cases — **never implementation details**.
 
 ## How this skill works
 
@@ -130,20 +130,20 @@ If the user already gives enough detail — or if the requirement is concrete en
 Cherry issues are bilingual, so search both languages:
 
 ```bash
-gh search issues "<EN keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
-gh search issues "<Chinese keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
+gh search issues "<EN keyword>" --repo <OWNER/REPO> --state all --limit 20
+gh search issues "<Chinese keyword>" --repo <OWNER/REPO> --state all --limit 20
 ```
 
 Also check Project #3:
 
 ```bash
-gh api graphql -f query='query{organization(login:"CherryHQ"){projectV2(number:3){items(first:50){nodes{content{__typename ... on Issue{number title state}}}}}}}'
+gh api graphql -f query='query{organization(login:"<OWNER>"){projectV2(number:3){items(first:50){nodes{content{__typename ... on Issue{number title state}}}}}}}'
 ```
 
 For top candidates, read full content:
 
 ```bash
-gh issue view <number> --repo CherryHQ/cherry-studio --json title,body,state,comments
+gh issue view <number> --repo <OWNER/REPO> --json title,body,state,comments
 ```
 
 Look for: actual user pain (not just title), workarounds users mention (they reveal the real gap), and closed issues with similar titles (often contain the proposed-but-not-shipped solution).
@@ -153,23 +153,23 @@ If a **strong duplicate** exists, recommend reusing it: "Issue #N already covers
 #### 2B. PR history — find prior attempts
 
 ```bash
-gh search prs "<keyword>" --repo CherryHQ/cherry-studio --state all --limit 20
+gh search prs "<keyword>" --repo <OWNER/REPO> --state all --limit 20
 ```
 
 For any **closed-but-not-merged** PR that looks related, read it:
 
 ```bash
-gh pr view <number> --repo CherryHQ/cherry-studio --json title,body,state,closedAt,comments
+gh pr view <number> --repo <OWNER/REPO> --json title,body,state,closedAt,comments
 ```
 
 The "why was this abandoned" answer is often the real constraint behind the new requirement. Merged PRs that touch the same area also matter — they tell you what already shipped, so Background doesn't claim "users can't do X" when X partially works.
 
 #### 2C. Repo code — verify current product state
 
-If you have the cherry-studio repo checked out locally, use the Grep tool. Otherwise:
+If you have the product repo checked out locally, use the Grep tool. Otherwise:
 
 ```bash
-gh search code "<keyword>" --repo CherryHQ/cherry-studio --limit 20
+gh search code "<keyword>" --repo <OWNER/REPO> --limit 20
 ```
 
 Look for what's actually wired up in `packages/aiCore/`, the feature area's components, and any feature flags. The point is to know the *current shape* of the product before claiming what's missing.
@@ -195,7 +195,7 @@ Concrete failure mode this prevents: the OpenAI/Anthropic interop PRD almost shi
 Write English first (it's the source of truth), then mirror in Chinese for review.
 
 Default examples / lexicon when concrete values are needed:
-- **Aggregator provider example**: `CherryIN` (not OpenRouter — Cherry-first)
+- **Aggregator provider example**: `<PrimaryProvider>` (not OpenRouter — product-first)
 - **Frontier OpenAI model example**: latest available (e.g. `gpt-5.5` at time of writing — not `gpt-4o`, which is too old to be a credible Agent example)
 - **Anthropic model example**: `Claude Sonnet` (most recent generation)
 - **Gemini model example**: latest stable Gemini at time of writing
@@ -216,7 +216,7 @@ Run this checklist mentally on every draft:
 - [ ] **Grounded in research**: Background and Related reflect findings from Step 2 — at least one issue/PR/code fact discovered during research, not only items the user pre-supplied. If research turned up nothing, say so explicitly rather than skipping the check.
 - [ ] **No code references**: Body contains no file paths, function names, library names, or framework references. (Common offenders: `src/`, `packages/`, `.ts`, `.tsx`, `useEffect`, `Redux`, `Drizzle`.)
 - [ ] **Spec ≠ Verification redundancy**: For each Verification bullet, scan the Spec list. If any Verification bullet just rephrases a Spec rule with different words, delete it. Verification should add specifics (named inputs, edge cases, negative checks) that Spec doesn't already imply.
-- [ ] **Examples are current**: Provider examples use CherryIN as primary; model examples are the latest generation, not legacy.
+- [ ] **Examples are current**: Provider examples use `<PrimaryProvider>` as primary; model examples are the latest generation, not legacy.
 - [ ] **No filler**: Phrases like "provide a great user experience", "improve user satisfaction", "TBD", "more details to come" — strip them.
 
 ### 5. Iterate with cross-section consistency
@@ -239,7 +239,7 @@ After the user has said "build it" but **before** `gh issue create` — do one l
 For each `#NNNN` in Related (and any PRs on a `PRs:` line):
 
 ```bash
-gh issue view <N> --repo CherryHQ/cherry-studio --json title,state,body,closedAt,stateReason
+gh issue view <N> --repo <OWNER/REPO> --json title,state,body,closedAt,stateReason
 ```
 
 Check four things:
@@ -270,7 +270,7 @@ cat > /tmp/req-body.md << 'BODY_EOF'
 ...
 BODY_EOF
 
-gh issue create --repo CherryHQ/cherry-studio \
+gh issue create --repo <OWNER/REPO> \
   --title "[Feature]: <title>" \
   --body-file /tmp/req-body.md
 ```
@@ -286,7 +286,7 @@ FEATURE_TODO_OPTION="78aaad35"
 PRIORITY_FIELD="PVTSSF_lADOCzFCf84A1VHUzgq0WFk"
 # Priority option IDs: P0=55393b39, P1=c2301f11, P2=dcd3a7ad
 
-ISSUE_NODE=$(gh api repos/CherryHQ/cherry-studio/issues/<NUMBER> -q ".node_id")
+ISSUE_NODE=$(gh api repos/<OWNER/REPO>/issues/<NUMBER> -q ".node_id")
 ITEM_ID=$(gh api graphql -f query="mutation{addProjectV2ItemById(input:{projectId:"$PROJECT_ID",contentId:"$ISSUE_NODE"}){item{id}}}" -q ".data.addProjectV2ItemById.item.id")
 
 gh api graphql -f query="mutation{
@@ -307,10 +307,10 @@ For each subsumed issue `#OLD`:
 
 ```bash
 # 1. Comment on the old issue, pointing to the new one
-gh issue comment <OLD> --repo CherryHQ/cherry-studio --body "Tracked in #<NEW> — the new requirement fully covers the pain reported here. Closing as superseded; please follow #<NEW> for progress, and reopen this if you feel anything is missing."
+gh issue comment <OLD> --repo <OWNER/REPO> --body "Tracked in #<NEW> — the new requirement fully covers the pain reported here. Closing as superseded; please follow #<NEW> for progress, and reopen this if you feel anything is missing."
 
 # 2. Close it as not-planned (since it's superseded, not literally completed by code)
-gh issue close <OLD> --repo CherryHQ/cherry-studio --reason "not planned"
+gh issue close <OLD> --repo <OWNER/REPO> --reason "not planned"
 ```
 
 Notes:
@@ -327,7 +327,7 @@ After this step, output a one-liner:
 ### 9. Reuse path (when duplicate exists)
 
 ```bash
-gh issue edit <number> --repo CherryHQ/cherry-studio \
+gh issue edit <number> --repo <OWNER/REPO> \
   --title "[Feature]: <new title>" \
   --body-file /tmp/req-body.md \
   --milestone "v2.1.0"
@@ -362,10 +362,10 @@ The original body content is overwritten — comments stay since `--body` only r
 ### Background / 背景 (Background)
 
 **EN:**
-> Cherry Studio's existing Memory feature only retains information within a single conversation. Users who switch topics or start new sessions lose context they've shared (preferences, ongoing project details, recurring facts), forcing them to re-explain themselves repeatedly.
+> The product's existing Memory feature only retains information within a single conversation. Users who switch topics or start new sessions lose context they've shared (preferences, ongoing project details, recurring facts), forcing them to re-explain themselves repeatedly.
 
 **ZH:**
-> Cherry Studio's existing Memory only retains information within a single session. When users switch topics or start new sessions, previously shared preferences, project details, and long-term facts are lost, forcing users to repeat themselves.
+> The product's existing Memory only retains information within a single session. When users switch topics or start new sessions, previously shared preferences, project details, and long-term facts are lost, forcing users to repeat themselves.
 
 ### Goal / 目标 (Goal)
 
