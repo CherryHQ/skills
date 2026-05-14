@@ -1,4 +1,4 @@
-# Cherry Studio / Skills
+# About This Repository
 
 These are the workflows the Cherry Studio team runs every day. We package them as skills so our AI agents handle the boring stuff — browser testing, filing bugs across two systems, drafting PRDs, turning transcripts into content, processing expenses.
 
