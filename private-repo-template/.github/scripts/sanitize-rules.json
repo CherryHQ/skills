@@ -1,0 +1,26 @@
+{
+  "replacements": [
+    {"find": "Cherry Studio", "replace": "the product", "case_sensitive": false},
+    {"find": "CherryHQ/cherry-studio", "replace": "\u003cOWNER/REPO\u003e"},
+    {"find": "CherryInternal/cherry-studio-enterprise-api", "replace": "\u003cPRIVATE_REPO\u003e"},
+    {"find": "cse-admin-staging.cherry-ai.com", "replace": "\u003cstaging-domain\u003e"},
+    {"find": "cherry-ai.com", "replace": "\u003ccompany-domain\u003e"},
+    {"find": "Feishu", "replace": "\u003cworkspace-tool\u003e"},
+    {"find": "base_token", "replace": "\u003cBASE_TOKEN\u003e", "is_secret": true},
+    {"find": "table_id", "replace": "\u003cTABLE_ID\u003e", "is_secret": true}
+  ],
+  "path_patterns": {
+    "exclude_from_public": [
+      "references/internal-onboarding.md",
+      "references/credentials.md",
+      "scripts/deploy-*.sh"
+    ]
+  },
+  "secret_detection": {
+    "patterns": [
+      "[a-zA-Z0-9]{22,}",
+      "tbl[a-zA-Z0-9]{10,}"
+    ],
+    "action": "fail"
+  }
+}

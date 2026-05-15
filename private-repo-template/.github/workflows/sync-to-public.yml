@@ -1,0 +1,123 @@
+name: Sync Skills to Public Repo
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - 'publish-manifest.json'
+      - '.github/scripts/**'
+  workflow_dispatch:
+    inputs:
+      manual_skills:
+        description: 'Space-separated skill names to sync (leave empty for all in manifest)'
+        required: false
+        default: ''
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout private repo
+        uses: actions/checkout@v4
+
+      - name: Checkout public repo
+        uses: actions/checkout@v4
+        with:
+          repository: CherryHQ/skills
+          path: public-repo
+          ssh-key: ${{ secrets.PUBLIC_REPO_DEPLOY_KEY }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Read manifest
+        id: manifest
+        run: |
+          SKILLS=$(jq -r '.skills | join(" ")' publish-manifest.json)
+          if [ -n "${{ github.event.inputs.manual_skills }}" ]; then
+            SKILLS="${{ github.event.inputs.manual_skills }}"
+          fi
+          echo "skills=$SKILLS" >> $GITHUB_OUTPUT
+          echo "Auto-merge: $(jq -r '.auto_merge // false' publish-manifest.json)" >> $GITHUB_OUTPUT
+          echo "Create PR: $(jq -r '.create_pr_instead_of_push // true' publish-manifest.json)" >> $GITHUB_OUTPUT
+
+      - name: Sync and sanitize skills
+        run: |
+          # Clean old skills not in manifest
+          for skill in $(ls public-repo/skills/ 2>/dev/null || true); do
+            if [[ ! " ${{ steps.manifest.outputs.skills }} " =~ " ${skill} " ]]; then
+              rm -rf public-repo/skills/$skill
+              echo "Removed $skill (not in manifest)"
+            fi
+          done
+
+          # Copy and sanitize each skill
+          for skill in ${{ steps.manifest.outputs.skills }}; do
+            if [ ! -d "skills/$skill" ]; then
+              echo "⚠️ Warning: skills/$skill not found"
+              continue
+            fi
+            
+            mkdir -p public-repo/skills/$skill
+            # Use rsync if available, otherwise cp -r
+            if command -v rsync >/dev/null; then
+              rsync -a --delete skills/$skill/ public-repo/skills/$skill/
+            else
+              rm -rf public-repo/skills/$skill/*
+              cp -r skills/$skill/* public-repo/skills/$skill/
+            fi
+            
+            # Run sanitization
+            python3 .github/scripts/sanitize.py \
+              .github/scripts/sanitize-rules.json \
+              public-repo/skills
+            echo "✅ Synced $skill"
+          done
+
+      - name: Commit changes
+        id: commit
+        run: |
+          cd public-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add skills/
+          
+          if git diff --cached --quiet; then
+            echo "No changes to push"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          git commit -m "Sync skills from private repo ($(date -u +%Y-%m-%d))"
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+
+      - name: Push to public repo (direct)
+        if: steps.manifest.outputs['Create PR'] == 'false' && steps.commit.outputs.has_changes == 'true'
+        run: |
+          cd public-repo
+          git push origin main
+
+      - name: Create branch and PR
+        if: steps.manifest.outputs['Create PR'] == 'true' && steps.commit.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PUBLIC_REPO_DEPLOY_KEY }}
+        run: |
+          cd public-repo
+          BRANCH="sync-$(date -u +%Y%m%d-%H%M%S)"
+          git checkout -b $BRANCH
+          git push origin $BRANCH
+          
+          # Create PR via GitHub API (since gh CLI might not be authenticated)
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/CherryHQ/skills/pulls \
+            -d '{
+              "title": "Sync skills from private repo",
+              "body": "Automated sync of skills from the internal repository.\n\nPlease review for any missed sanitization or unintended changes.",
+              "head": "'"$BRANCH"'",
+              "base": "main"
+            }'

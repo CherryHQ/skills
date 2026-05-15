@@ -1,0 +1,11 @@
+{
+  "skills": [
+    "test-and-report",
+    "prd-creator",
+    "transcript-to-content",
+    "expense-reimbursement"
+  ],
+  "sanitize_rules": ".github/scripts/sanitize-rules.json",
+  "auto_merge": false,
+  "create_pr_instead_of_push": true
+}
