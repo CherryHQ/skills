@@ -1,0 +1,32 @@
+Senior Data Analytics Manager
+ByteDance — Beijing / Shanghai
+
+About the Role:
+We are seeking an experienced Senior Data Analytics Manager to lead our Growth Analytics team. You will own the analytics strategy for user acquisition and retention, manage a team of 5-8 analysts, and partner closely with product, marketing, and engineering leadership.
+
+Responsibilities:
+- Define and own the analytics roadmap for Growth, including user funnel analysis, cohort analysis, and LTV modeling
+- Lead and mentor a team of 5-8 data analysts and data scientists
+- Partner with product managers to design and analyze A/B experiments at scale
+- Build executive-facing dashboards and deliver weekly business review presentations
+- Establish data governance standards and ensure data quality across the team
+- Drive adoption of self-serve analytics tools across the organization
+- Collaborate with data engineering to design scalable data pipelines
+
+Requirements:
+- 5+ years of experience in data analytics, business intelligence, or data science
+- 2+ years of people management experience
+- Expert-level SQL and proficiency in Python or R
+- Deep experience with A/B testing and causal inference methods
+- Strong experience with BI tools (Tableau, Looker, or equivalent)
+- Proven track record of delivering business impact through data
+- Excellent communication skills — able to present complex findings to C-suite
+
+Preferred:
+- Experience at a high-growth internet company (e-commerce, social media, fintech)
+- Familiarity with growth frameworks (AARRR, North Star Metric)
+- Experience with large-scale distributed systems (Spark, Hive, Presto)
+- MBA or advanced degree preferred
+
+About ByteDance:
+ByteDance is the parent company of TikTok, Douyin, and other globally recognized products. We are a mission-driven company committed to inspiring creativity and bringing joy.

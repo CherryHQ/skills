@@ -1,0 +1,35 @@
+Data Analyst Intern
+Amazon — Seattle, WA (Remote Available)
+
+About the Role:
+We are looking for a Data Analyst Intern to join our Customer Intelligence team. You will work alongside experienced analysts to build dashboards, analyze behavioral data, and help the team make data-driven decisions.
+
+Responsibilities:
+- Analyze large datasets using Python and SQL to identify trends and patterns
+- Build interactive Tableau dashboards for weekly business reviews
+- Collaborate with cross-functional teams to define and track key metrics
+- Design and analyze A/B tests to evaluate feature impact
+- Present findings to product and engineering stakeholders
+- Document data pipelines and analysis methodologies
+
+Requirements:
+- Currently pursuing a Bachelor's or Master's degree in Computer Science, Statistics, Business Analytics, or related field
+- Expected graduation: 2025 or 2026
+- Strong proficiency in Python (pandas, numpy, scikit-learn)
+- Experience with SQL (joins, aggregations, window functions)
+- Familiarity with data visualization tools (Tableau, Power BI, or similar)
+- Understanding of A/B testing and statistical hypothesis testing
+- Strong analytical thinking and attention to detail
+
+Nice to Have:
+- Experience with Spark or distributed data processing
+- Knowledge of machine learning fundamentals
+- Prior internship experience in analytics or data science
+- Familiarity with AWS (S3, Athena, Redshift)
+
+What We Offer:
+- Competitive internship stipend
+- Housing assistance for relocating interns
+- Mentorship from senior data scientists
+- Opportunity for full-time conversion
+- Inclusive and collaborative work culture
