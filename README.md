@@ -39,6 +39,12 @@ The pattern: **humans decide, the skill formats, tracks, and syncs across system
 |-------|---------|--------------|
 | [expense-reimbursement](skills/expense-reimbursement/) | Invoice → reimbursement → ledger | Batch aggregation, approval workflow, financial dashboard |
 
+### 🎯 Career & Job Hunting
+| Skill | Purpose | What it does |
+|-------|---------|--------------|
+| [cv-expert](skills/cv-expert/) | JD-matched resume optimization | 7-dimension diagnosis, Gap Q&A to mine real experience, Word-comment annotations, 校招 / 社招 modes |
+| [interview-retro](skills/interview-retro/) | Post-interview retrospective | Per-question analysis, 5-dimension scoring, better-answer templates, next-round prep checklist → Feishu doc |
+
 ---
 
 ## For External Use
