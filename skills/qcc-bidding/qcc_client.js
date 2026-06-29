@@ -66,7 +66,9 @@ fetch(url, {
     const dataLine = t.split('\n').find(l => l.startsWith('data:'));
     if (!dataLine) throw new Error('No SSE data line found');
     const d = JSON.parse(dataLine.slice(6));
-    const result = JSON.parse(d.result.content[0].text);
+    const text = d?.result?.content?.[0]?.text;
+    if (!text) throw new Error('API returned unexpected response format');
+    const result = JSON.parse(text);
     console.log(JSON.stringify(result, null, 2));
   })
   .catch(e => {

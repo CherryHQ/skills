@@ -57,7 +57,9 @@ fetch('https://agent.qcc.com/mcp/operation/stream', {
     const dataLine = t.split('\n').find(l => l.startsWith('data:'));
     if (!dataLine) throw new Error('No SSE data line');
     const d = JSON.parse(dataLine.slice(6));
-    const r2 = JSON.parse(d.result.content[0].text);
+    const text = d?.result?.content?.[0]?.text;
+    if (!text) throw new Error('API returned unexpected response format');
+    const r2 = JSON.parse(text);
     console.log('## ' + r2.摘要);
     (r2.招投标信息 || []).slice(0, 15).forEach(b =>
       console.log('| ' + b.发布日期 + ' | ' + b.中标金额 + ' | ' + (b.中标单位 || []).join('/') + ' | ' + (b.项目名称 || '').substring(0, 60) + ' |')

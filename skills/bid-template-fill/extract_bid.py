@@ -121,11 +121,18 @@ def extract_bid_info(text):
             break
 
     # 截止日期
-    deadline = re_first(
-        r'(?:投标截止|递交截止|开标)[时间日期]?[：:]\s*(\d{4})[年/\-.](\d{1,2})[月/\-.](\d{1,2})')
-    if not deadline:
-        deadline = re_first(
-            r'(\d{4})[年/\-.](\d{1,2})[月/\-.](\d{1,2})[日号].*?(?:截止|开标)')
+    deadline_match = re.search(
+        r'(?:投标截止|递交截止|开标)[时间日期]?[：:]\s*(\d{4})[年/\-.](\d{1,2})[月/\-.](\d{1,2})', content)
+    if not deadline_match:
+        deadline_match = re.search(
+            r'(\d{4})[年/\-.](\d{1,2})[月/\-.](\d{1,2})[日号].*?(?:截止|开标)', content)
+    deadline = None
+    if deadline_match:
+        deadline = {
+            'year': int(deadline_match.group(1)),
+            'month': int(deadline_match.group(2)),
+            'day': int(deadline_match.group(3))
+        }
 
     # 投标有效期
     validity = re_first(r'(?:投标有效|有效期)[：:\s]*(\d+)\s*[天日历个]')
@@ -185,13 +192,6 @@ def extract_bid_info(text):
         'subcontract': subcontract,
         'qualifications': qualifications,
     }
-
-    if deadline:
-        result['deadline'] = {
-            'year': int(deadline[0]),
-            'month': int(deadline[1]),
-            'day': int(deadline[2])
-        }
 
     if budget:
         result['budget'] = budget

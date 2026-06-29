@@ -11,7 +11,7 @@
  */
 import { readFileSync, writeFileSync, rmSync, readdirSync, statSync, existsSync, renameSync, mkdirSync } from "fs";
 import { join, dirname, relative } from "path";
-import { execSync } from "child_process";
+import { execSync, execFileSync } from "child_process";
 import { platform, tmpdir } from "os";
 
 // ==================== 参数校验 ====================
@@ -73,7 +73,7 @@ function unzipDocx(docxPath, destDir) {
       { stdio: "pipe", encoding: "utf-8", maxBuffer: 100 * 1024 * 1024 }
     );
   } else {
-    execSync(`unzip -o "${docxPath}" -d "${destDir}"`, {
+    execFileSync("unzip", ["-o", docxPath, "-d", destDir], {
       stdio: "pipe", encoding: "utf-8", maxBuffer: 100 * 1024 * 1024
     });
   }
@@ -121,35 +121,32 @@ function zipDocx(sourceDir, outputPath) {
       rmSync(ps1Path, { force: true });
     }
   } else {
-    const cwd = process.cwd();
-    process.chdir(absSource);
     try {
-      execSync(`zip -r "${absOutput}" .`, {
-        stdio: "pipe", encoding: "utf-8", maxBuffer: 100 * 1024 * 1024
+      execFileSync("zip", ["-r", absOutput, "."], {
+        cwd: absSource, stdio: "pipe", encoding: "utf-8", maxBuffer: 100 * 1024 * 1024
       });
     } finally {
-      process.chdir(cwd);
     }
   }
 }
 
 // ==================== 日期替换 ====================
 
-const DATE_PATTERN = /(20\d{2})\s*年\s*(\d{1,2})\s*月\s*(\d{1,2})\s*日/g;
+const DATE_PATTERN = /(20\d{2})[_\s]*年[_\s]*(\d{1,2})[_\s]*月[_\s]*(\d{1,2})[_\s]*日/g;
+const DATE_EMPTY_PATTERN = /_*(20\d{2})[_\s]*年[_\s]*月[_\s]*日/g;
+const DATE_BARE_PATTERN = /_*年[_\s]*月[_\s]*日/g;
 
 function replaceDatesInText(text) {
   const today = todayChinese();
-  const todayCompact = today.replace(/\s+/g, "");
-  return text.replace(DATE_PATTERN, (match, y, m, d) => {
-    const year = parseInt(y, 10);
-    const month = parseInt(m, 10);
-    const day = parseInt(d, 10);
+  let result = text.replace(DATE_PATTERN, (match, y, m, d) => {
+    const year = parseInt(y, 10), month = parseInt(m, 10), day = parseInt(d, 10);
     const now = new Date();
-    if (year === now.getFullYear() && month === now.getMonth() + 1 && day === now.getDate()) {
-      return match;
-    }
+    if (year === now.getFullYear() && month === now.getMonth() + 1 && day === now.getDate()) return match;
     return today;
   });
+  result = result.replace(DATE_EMPTY_PATTERN, today);
+  result = result.replace(DATE_BARE_PATTERN, today);
+  return result;
 }
 
 // ==================== DOCX XML感知替换 ====================

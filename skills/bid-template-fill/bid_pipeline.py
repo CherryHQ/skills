@@ -66,8 +66,6 @@ if sys.platform == "win32":
         pass
 
 FILL_PY = Path(__file__).resolve().parent / "fill_py.py"
-TODAY = date.today()
-TODAY_STR = f"{TODAY.year} 年 {TODAY.month:02d} 月 {TODAY.day:02d} 日"
 
 DEFAULT_TEMPLATE_NAMES = ["报价书_脱敏.docx", "商务标书_脱敏.docx", "技术标书_脱敏.docx"]
 
@@ -120,22 +118,22 @@ def parse_bid_markdown(filepath):
         m = re.search(pattern, content)
         return m.group(1).strip() if m else default
 
-    buyer = re_first(r"招标人[：:]\s*(.+?)(?:\n|\$)")
+    buyer = re_first(r"招标人[：:]\s*(.+?)(?:\n|$)")
     if not buyer:
-        buyer = re_first(r"采购人[：:]\s*(.+?)(?:\n|\$)")
+        buyer = re_first(r"采购人[：:]\s*(.+?)(?:\n|$)")
     if not buyer:
-        buyer = re_first(r"招标单位[：:]\s*(.+?)(?:\n|\$)")
+        buyer = re_first(r"招标单位[：:]\s*(.+?)(?:\n|$)")
 
     bid_no = re_first(r"(?:招标|项目)编号[：:]\s*([^\n]+)")
-    agency = re_first(r"招标代理[：:]\s*(.+?)(?:\n|\$)")
-    project_name = re_first(r"项目名称[：:]\s*(.+?)(?:\n|\$)")
+    agency = re_first(r"招标代理[：:]\s*(.+?)(?:\n|$)")
+    project_name = re_first(r"项目名称[：:]\s*(.+?)(?:\n|$)")
 
     # Try multiple lot patterns
-    lots_raw = re.findall(r"###?\s*\d+\.\d+\s*(.+?)(?:\n|\$)", content)
+    lots_raw = re.findall(r"###?\s*\d+\.\d+\s*(.+?)(?:\n|$)", content)
     if not lots_raw:
-        lots_raw = re.findall(r"标段\d+\s+(.+?)(?:\n|\$)", content)
+        lots_raw = re.findall(r"标段\d+\s+(.+?)(?:\n|$)", content)
     if not lots_raw:
-        lots_raw = re.findall(r"标段\d+\s*[|｜\s]\s*(.+?)(?:[|｜\n]|\$)", content)
+        lots_raw = re.findall(r"标段\d+\s*[|｜\s]\s*(.+?)(?:[|｜\n]|$)", content)
     lot_map = {}
     count = 0
     for name in lots_raw[:10]:
@@ -145,7 +143,7 @@ def parse_bid_markdown(filepath):
             lot_map[f"（标段{count}名称）"] = name
 
     deadline_match = re.search(
-        r"(?:戳止|递交戳止|开标)[时间日期]?[：:]\s*(\d{4})[年\-](\d{1,2})[月\-](\d{1,2})",
+        r"(?:投标截止|递交截止|截止|开标)[时间日期]?[：:]\s*(\d{4})[年\-](\d{1,2})[月\-](\d{1,2})",
         content
     )
     deadline = None
@@ -164,11 +162,11 @@ def parse_bid_markdown(filepath):
 
     deposit = re_first(r"(?:投标保证金|保证金)(?:金额)?[：:\s]*(?:人民币\s*)?(\d[\d,.]*\s*(?:万元?|元))")
 
-    payment = re_first(r"付款方式[：:]\s*(.+?)(?:\n|\$)")
-    warranty = re_first(r"质保期[：:]\s*(.+?)(?:\n|\$)")
-    delivery = re_first(r"交货期[：:]\s*(.+?)(?:\n|\$)")
+    payment = re_first(r"付款方式[：:]\s*(.+?)(?:\n|$)")
+    warranty = re_first(r"质保期[：:]\s*(.+?)(?:\n|$)")
+    delivery = re_first(r"交货期[：:]\s*(.+?)(?:\n|$)")
     if not delivery:
-        delivery = re_first(r"供货期[：:]\s*(.+?)(?:\n|\$)")
+        delivery = re_first(r"供货期[：:]\s*(.+?)(?:\n|$)")
 
     return {
         "buyer": buyer,
@@ -380,6 +378,8 @@ def fill_small(template_path, output_path, json_path):
 def fill_large(template_path, output_path, data):
     """Pure Python zipfile fill for large files (5MB+). Zero external deps.
     Phase 1: dates -> Phase 2: placeholders. Handles headers/footers/body."""
+    today = date.today()
+    today_str = f"{today.year} 年 {today.month:02d} 月 {today.day:02d} 日"
     tmp = tempfile.mkdtemp(prefix=".tmp_bid_")
     try:
         with zipfile.ZipFile(template_path, "r") as zf:
@@ -409,24 +409,59 @@ def fill_large(template_path, output_path, data):
                         y = int(m.group(1))
                         mo = int(m.group(2))
                         d = int(m.group(3))
-                        if y == TODAY.year and mo == TODAY.month and d == TODAY.day:
+                        if y == today.year and mo == today.month and d == today.day:
                             return m.group(0)
-                        return TODAY_STR
+                        return today_str
                     nt, c1 = d1.subn(dr, fcontent)
-                    nt, c2 = d2.subn(TODAY_STR, nt)
-                    nt, c3 = d3.subn(TODAY_STR, nt)
+                    nt, c2 = d2.subn(today_str, nt)
+                    nt, c3 = d3.subn(today_str, nt)
                     if c1 + c2 + c3 > 0:
                         fcontent = nt
                         changed = True
 
-                # Phase 2: Placeholder replacement AFTER dates
-                for key, value in sorted_keys:
-                    if not key or not value:
-                        continue
-                    if key in fcontent:
-                        escaped = str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
-                        fcontent = fcontent.replace(key, escaped)
+                # Phase 2: XML-aware placeholder replacement for word/ files, plain text for others
+                if rel_path.startswith("word/") and fname.endswith(".xml"):
+                    wt_re = _re.compile(r"(<w:t[^>]*>)(.*?)(</w:t>)", _re.DOTALL)
+                    # Merge <w:t> runs per paragraph for XML-aware replacement
+                    def _replace_para(p_match):
+                        para_text = p_match.group(0)
+                        # Collect all <w:t> text
+                        texts = []
+                        def _collect(m):
+                            texts.append(m.group(2))
+                            return m.group(0)
+                        wt_re.sub(_collect, para_text)
+                        merged = "".join(texts)
+                        if not merged.strip():
+                            return para_text
+                        orig = merged
+                        for key, value in sorted_keys:
+                            if key and key in merged:
+                                escaped = str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+                                merged = merged.replace(key, escaped)
+                        if merged == orig:
+                            return para_text
+                        # Rebuild: put merged text in first <w:t>, clear others
+                        first = [True]
+                        def _rebuild(m):
+                            if first[0]:
+                                first[0] = False
+                                return m.group(1) + merged + m.group(3)
+                            return m.group(1) + m.group(3)
+                        return wt_re.sub(_rebuild, para_text)
+                    p_re = _re.compile(r"<w:p\b[\s\S]*?</w:p>", _re.DOTALL)
+                    new_content = p_re.sub(_replace_para, fcontent)
+                    if new_content != fcontent:
+                        fcontent = new_content
                         changed = True
+                else:
+                    for key, value in sorted_keys:
+                        if not key:
+                            continue
+                        if key in fcontent:
+                            escaped = str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+                            fcontent = fcontent.replace(key, escaped)
+                            changed = True
 
                 if changed:
                     with open(fpath, "w", encoding="utf-8") as f:
@@ -560,7 +595,8 @@ def main():
     for t in templates:
         print(f"  - {t.name}")
 
-    out_dir = Path(output_dir) if output_dir else Path(bid_file).parent / (chr(0x6210)+chr(0x54c1)+chr(0x6807)+chr(0x4e66))
+    out_dir = Path(output_dir) if output_dir else Path(bid_file).parent / "成品标书"
+    out_dir.mkdir(parents=True, exist_ok=True)
     all_ok = True
     for tmpl_path in templates:
         stem = tmpl_path.stem.replace("_脱敏", "")
