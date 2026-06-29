@@ -1,0 +1,12 @@
+{
+  "name": "bid-template-fill",
+  "version": "1.0.0",
+  "description": "投标书模板填充引擎 - DOCX模板占位符替换",
+  "type": "module",
+  "main": "fill_template.js",
+  "scripts": {
+    "fill": "node fill_template.js"
+  },
+  "keywords": ["bid", "docx", "template", "投标", "标书"],
+  "license": "MIT"
+}
