@@ -422,32 +422,42 @@ def fill_large(template_path, output_path, data):
                 # Phase 2: XML-aware placeholder replacement for word/ files, plain text for others
                 if rel_path.startswith("word/") and fname.endswith(".xml"):
                     wt_re = _re.compile(r"(<w:t[^>]*>)(.*?)(</w:t>)", _re.DOTALL)
-                    # Merge <w:t> runs per paragraph for XML-aware replacement
                     def _replace_para(p_match):
                         para_text = p_match.group(0)
-                        # Collect all <w:t> text
-                        texts = []
-                        def _collect(m):
-                            texts.append(m.group(2))
-                            return m.group(0)
-                        wt_re.sub(_collect, para_text)
-                        merged = "".join(texts)
-                        if not merged.strip():
+                        # Pass 1: collect text and boundaries
+                        elements = []  # (text, start_pos)
+                        merged = ""
+                        for m in wt_re.finditer(para_text):
+                            text = m.group(2)
+                            start = len(merged)
+                            merged += text
+                            elements.append((text, start))
+                        if not merged.strip() or not elements:
                             return para_text
-                        orig = merged
+                        orig_merged = merged
                         for key, value in sorted_keys:
                             if key and key in merged:
                                 escaped = str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
                                 merged = merged.replace(key, escaped)
-                        if merged == orig:
+                        if merged == orig_merged:
                             return para_text
-                        # Rebuild: put merged text in first <w:t>, clear others
-                        first = [True]
+                        # Pass 2: redistribute new text to <w:t> elements proportionally
+                        old_total = len(orig_merged)
+                        new_total = len(merged)
+                        idx = [0]  # use list for closure mutability
                         def _rebuild(m):
-                            if first[0]:
-                                first[0] = False
-                                return m.group(1) + merged + m.group(3)
-                            return m.group(1) + m.group(3)
+                            i = idx[0]
+                            idx[0] += 1
+                            if i >= len(elements):
+                                return m.group(0)
+                            old_text, start = elements[i]
+                            old_end = start + len(old_text)
+                            new_start = int(new_total * start / old_total) if old_total > 0 else 0
+                            new_end = int(new_total * old_end / old_total) if old_total > 0 else 0
+                            if i == len(elements) - 1:
+                                new_end = new_total
+                            new_text = merged[new_start:new_end]
+                            return m.group(1) + new_text + m.group(3)
                         return wt_re.sub(_rebuild, para_text)
                     p_re = _re.compile(r"<w:p\b[\s\S]*?</w:p>", _re.DOTALL)
                     new_content = p_re.sub(_replace_para, fcontent)

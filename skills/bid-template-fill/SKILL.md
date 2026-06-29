@@ -15,16 +15,16 @@ trigger_keywords: [填模板, 写标书, 投标, 出标书, 生成投标文件, 
 技能现在支持直接读取公司信息 DOCX 和招标 PDF/DOCX，自动提取并映射到模板：
 
 `
-公司信息.docx ──→ extract_company.py ──→ company.json（自动映射脱敏Key）
-招标文件.pdf  ──→ extract_bid.py     ──→ 招标方结构化数据
+公司信息.docx ──→ scripts/extract_company.py ──→ company.json（自动映射脱敏Key）
+招标文件.pdf  ──→ scripts/extract_bid.py     ──→ 招标方结构化数据
                      ↓
-              bid_pipeline.py ──→ 合并+填充 ──→ 成品标书.docx
+              scripts/bid_pipeline.py ──→ 合并+填充 ──→ 成品标书.docx
 `
 
 **一键命令：**
 ```bash
 # 从公司DOCX + 招标PDF 直接生成标书
-python bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx --templates-dir ./模板/
+python scripts/bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx --templates-dir ./模板/
 ```
 
 > **输出文件夹：**生成的标书文件默认保存在招标文件同目录下的 成品标书/ 子文件夹中，文件命名格式：标书类型_项目名.docx。可通过 --output-dir 自定义。
@@ -32,16 +32,16 @@ python bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx --templ
 **分步使用：**
 ```bash
 # 步骤A：提取公司信息
-python extract_company.py 公司信息.docx -o company.json
+python scripts/extract_company.py 公司信息.docx -o company.json
 
 # 步骤B：提取招标信息
-python extract_bid.py 招标文件.pdf --print
+python scripts/extract_bid.py 招标文件.pdf --print
 
 # 步骤C：管道生成
-python bid_pipeline.py 招标文件.md --company-json company.json
+python scripts/bid_pipeline.py 招标文件.md --company-json company.json
 ```
 
-> **首次使用**：编辑 `desensitize_map.json`，将 `template_desensitize_map` 中的虚拟文本改为你模板中实际出现的脱敏名。也可通过 `--map` 指定自定义映射文件：`python extract_company.py 公司信息.docx --map my_map.json`
+> **首次使用**：编辑 `desensitize_map.json`，将 `template_desensitize_map` 中的虚拟文本改为你模板中实际出现的脱敏名。也可通过 `--map` 指定自定义映射文件：`python scripts/extract_company.py 公司信息.docx --map my_map.json`
 
 ## 环境要求
 
@@ -56,7 +56,7 @@ python bid_pipeline.py 招标文件.md --company-json company.json
 步骤2: 扫描脱敏模板 → 发现占位符与脱敏文本
 步骤3: 收集投标人信息 → 向用户询问必要数据
 步骤4: 构建替换数据 → 映射数据到占位符
-步骤5: 执行填充 → 调用 fill_py.py 或 fill_template.js
+步骤5: 执行填充 → 调用 scripts/fill_py.py 或 scripts/fill_template.js
 步骤6: 验证输出 → 检查遗漏占位符
 ```
 
@@ -79,7 +79,7 @@ python bid_pipeline.py 招标文件.md --company-json company.json
 | 需何种认证 | `_[认证承诺]_` | 投标函第12款 |
 | 标段名称 | `（标段1名称）` | 报价总表 |
 
-> 如招标文件为 PDF，使用可用的 PDF 读取工具提取文本。如已有解析好的 Markdown，可直接用 `bid_pipeline.py` 自动提取。
+> 如招标文件为 PDF，使用可用的 PDF 读取工具提取文本。如已有解析好的 Markdown，可直接用 `scripts/bid_pipeline.py` 自动提取。
 
 ---
 
@@ -292,19 +292,19 @@ Get-ChildItem -Recurse $tmp -Filter *.xml | ForEach-Object {
 方式 A：Python（推荐）
 
 ```bash
-python fill_py.py <模板.docx> <输出.docx> <替换数据.json>
+python scripts/fill_py.py <模板.docx> <输出.docx> <替换数据.json>
 ```
 
 两阶段引擎：先占位符替换，再整日期替换。自动报告遗漏占位符。
 
-> ⚠️ **格式注意**：当占位符跨多个 Word run 时，引擎会合并 run 进行替换，差异化格式可能丢失。建议模板占位符使用统一格式。
+> ⚠️ **格式注意**：当占位符跨多个 Word run 时，引擎会按比例将替换文本分配回各 run，保留原有加粗/斜体等格式属性。若替换文本长度与原占位符差异较大，可能导致文字在不同格式 run 间重新分配，但不会丢失格式定义。
 >
 > **页眉页脚处理**：`python-docx` 只能访问默认页眉。引擎保存后会额外解包 DOCX，直接修补 `header*.xml` 和 `footer*.xml` 中遗漏的占位符和日期。
 
 ### 方式 B：Node.js（零依赖，仅 Windows）
 
 ```bash
-node fill_template.js <模板.docx> <输出.docx> <替换数据.json>
+node scripts/fill_template.js <模板.docx> <输出.docx> <替换数据.json>
 ```
 
 同两阶段策略，额外自动检查遗漏占位符。依赖 PowerShell 进行 ZIP 操作，不支持 macOS/Linux。
@@ -312,7 +312,7 @@ node fill_template.js <模板.docx> <输出.docx> <替换数据.json>
 ### 方式 C：管道一键生成
 
 ```bash
-python bid_pipeline.py 招标文件.md [--company-json 公司数据.json] [--templates 模板1.docx 模板2.docx ...]
+python scripts/bid_pipeline.py 招标文件.md [--company-json 公司数据.json] [--templates 模板1.docx 模板2.docx ...]
 ```
 
 自动完成步骤1→4→5，从招标文件 Markdown 到成品标书。
@@ -328,18 +328,18 @@ python bid_pipeline.py 招标文件.md [--company-json 公司数据.json] [--tem
 
 ## 步骤6: 验证输出
 
-填充完成后自动运行 verify_bid.py 进行二次核对：
+填充完成后自动运行 scripts/verify_bid.py 进行二次核对：
 
 ```bash
 # 自动（pipeline 内置）
-python bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx
+python scripts/bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx
 # → 填充完成后自动审核每个输出文件
 
 # 手动
-python verify_bid.py 成品标书.docx --company-docx 公司信息.docx
+python scripts/verify_bid.py 成品标书.docx --company-docx 公司信息.docx
 
 # 跳过审核
-python bid_pipeline.py 招标文件.md --company-json company.json --no-verify
+python scripts/bid_pipeline.py 招标文件.md --company-json company.json --no-verify
 ```
 
 **检查等级：**
@@ -361,8 +361,8 @@ python bid_pipeline.py 招标文件.md --company-json company.json --no-verify
 |------|---------|---------|
 | 占位符未被替换 | JSON 中的 key 与模板中的文本不完全一致 | 检查空格、全角/半角字符 |
 | 日期没有被替换 | 日期格式不匹配正则 | 确保日期为"YYYY年MM月DD日"格式 |
-| `fill_py.py` 报 ModuleNotFoundError | 未安装 python-docx | `pip install python-docx` |
-| `fill_template.js` 报错 | 非 Windows 系统 | 改用 Python 方式 |
+| `scripts/fill_py.py` 报 ModuleNotFoundError | 未安装 python-docx | `pip install python-docx` |
+| `scripts/fill_template.js` 报错 | 非 Windows 系统 | 改用 Python 方式 |
 | 输出文件格式错乱 | 模板中的复杂格式 | 参见步骤5的格式警告 |
 | 保证金表格金额为空 | 模板金额为空白占位符（`￥  元`） | 在 JSON 中精确匹配该空白模式 |
 | 页眉未更新 | 模板使用了非默认页眉类型 | 引擎已自动处理，无需手动干预 |
