@@ -246,17 +246,27 @@ def _num_to_chinese_upper(n):
     
     return result + "元整"
 def _add_amount_keys(data, deposit_num):
-    """Add replacement keys for desensitized amount patterns in templates"""
+    """更新 data 中金额/大写相关 key 的 value 为实际金额。
+    只更新已有 key 的 value，不创建新 key（确保 fill 时 key 能匹配模板文本）。"""
+    import re as _re2
     amount_str = str(deposit_num)
     chinese_upper = _num_to_chinese_upper(deposit_num)
-    
-    # 报价书 (Price Quotation) - desensitized amounts
-    data["￥ 174774 元"] = f"￥ {amount_str} 元"
-    data["合计：￥ 184968  元。大写    壹拾叁万元整                  "] = f"合计：￥ {amount_str}  元。大写    {chinese_upper}                  "
-    
-    # 商务标书 (Business Bid) - empty amounts
-    data["￥          元"] = f"￥ {amount_str} 元"
-    data["合计：￥           元。大写                       "] = f"合计：￥ {amount_str}  元。大写    {chinese_upper}                       "
+
+    for key in list(data.keys()):
+        k = str(key)
+        v = str(data[key]) if isinstance(data[key], str) else ""
+        changed = v
+        if _re2.search(r'￥\s*\d+[\d,]*\s*元', k):
+            # key 本身含金额模式→用实际金额替换 value
+            data[key] = _re2.sub(r'￥\s*\d+[\d,]*\s*元', f'￥ {amount_str} 元', k)
+        if _re2.search(r'￥\s*\d+[\d,]*\s*元', v):
+            changed = _re2.sub(r'￥\s*\d+[\d,]*\s*元', f'￥ {amount_str} 元', v)
+        if _re2.search(r'大写\s+[零壹贰叁肆伍陆柒捌玖拾佰仟万亿元整]+', k):
+            data[key] = _re2.sub(r'大写\s+[零壹贰叁肆伍陆柒捌玖拾佰仟万亿元整]+', f'大写    {chinese_upper}', k)
+        if _re2.search(r'大写\s+[零壹贰叁肆伍陆柒捌玖拾佰仟万亿元整]+', v):
+            changed = _re2.sub(r'大写\s+[零壹贰叁肆伍陆柒捌玖拾佰仟万亿元整]+', f'大写    {chinese_upper}', v)
+        if changed != v:
+            data[key] = changed
 
 # ── End amount helpers ──
 
@@ -336,7 +346,7 @@ def discover_templates(templates_dir, explicit=None):
     if templates_dir:
         td = Path(templates_dir)
         if td.is_dir():
-            for pattern in ["*脱敏*.docx", "*脱敏*.docx"]:
+            for pattern in ["*脱敏*.docx"]:
                 for fpath in td.glob(pattern):
                     if fpath not in templates:
                         templates.append(fpath)
@@ -392,9 +402,9 @@ def fill_large(template_path, output_path, data):
 
                 # Phase 1: Date replacement FIRST (before placeholder values interfere)
                 if rel_path.startswith("word/"):
-                    d1 = _re.compile("(20\d{2})[_\s]*年[_\s]*(\d{1,2})[_\s]*月[_\s]*(\d{1,2})[_\s]*日")
-                    d2 = _re.compile("_*(20\d{2})[_\s]*年[_\s]*月[_\s]*日")
-                    d3 = _re.compile("_*年[_\s]*月[_\s]*日")
+                    d1 = _re.compile(r"(20\d{2})[_\s]*年[_\s]*(\d{1,2})[_\s]*月[_\s]*(\d{1,2})[_\s]*日")
+                    d2 = _re.compile(r"_*(20\d{2})[_\s]*年[_\s]*月[_\s]*日")
+                    d3 = _re.compile(r"_*年[_\s]*月[_\s]*日")
                     def dr(m):
                         y = int(m.group(1))
                         mo = int(m.group(2))
@@ -600,18 +610,4 @@ def main():
     print(f"\n[DONE] {status} - output: {out_dir}")
 
 if __name__ == "__main__":
-    main()    # Try multiple lot patterns
-    lots_raw = re.findall(r"###?\s*\d+\.\d+\s*(.+?)(?:\n|\$)", content)
-    if not lots_raw:
-        lots_raw = re.findall(r"标段\d+\s+(.+?)(?:\n|\$)", content)
-    if not lots_raw:
-        lots_raw = re.findall(r"标段\d+\s*[|｜\s]\s*(.+?)(?:[|｜\n]|\$)", content)
-    lot_map = {}
-    count = 0
-    for name in lots_raw[:10]:
-        name = re.sub(r"\s+(?:QD|CD|DHG|ISO|A\d).*$", "", name).strip()
-        if 4 <= len(name) <= 40 and count < 3:
-            count += 1
-            lot_map[f"（标段{count}名称）"] = name
-
-
+    main()

@@ -1,6 +1,6 @@
 ---
 name: bid-template-fill
-description: 投标书模板填充引擎。扫描脱敏DOCX模板中的占位符，收集投标数据，生成替换数据并填入模板，输出成品标书。
+description: 只要用户提到「填模板」「写标书」「出标书」「生成投标文件」「标书填充」「套模板」「做标书」，或者提供了脱敏 DOCX 模板需要填充，就必须使用此 skill。扫描脱敏 DOCX 模板中的占位符和虚拟文本，自动提取招标信息、收集投标人数据、构建替换映射、执行填充并输出可直接提交的成品标书。覆盖商务标+技术标+报价书全部章节。即使用户只说「帮我把这个模板填了」也要触发。
 trigger_keywords: [填模板, 写标书, 投标, 出标书, 生成投标文件, 标书填充]
 ---
 
@@ -22,17 +22,15 @@ trigger_keywords: [填模板, 写标书, 投标, 出标书, 生成投标文件, 
 `
 
 **一键命令：**
-`ash
+```bash
 # 从公司DOCX + 招标PDF 直接生成标书
 python bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx --templates-dir ./模板/
-`
+```
 
-> **输出文件夹：**生成的标书文件默认保存在招标文件同目录下的 成品标书/ 子文件夹中，也可通过 --output-dir 自定义。
-
-**输出文件夹：**生成的标书文件默认保存到招标文件同目录下的 成品标书/ 子文件夹中。文件命名格式： 标书类型_项目名.docx。可通过 --output-dir 自定义。
+> **输出文件夹：**生成的标书文件默认保存在招标文件同目录下的 成品标书/ 子文件夹中，文件命名格式：标书类型_项目名.docx。可通过 --output-dir 自定义。
 
 **分步使用：**
-`ash
+```bash
 # 步骤A：提取公司信息
 python extract_company.py 公司信息.docx -o company.json
 
@@ -41,7 +39,9 @@ python extract_bid.py 招标文件.pdf --print
 
 # 步骤C：管道生成
 python bid_pipeline.py 招标文件.md --company-json company.json
-`
+```
+
+> **首次使用**：编辑 `desensitize_map.json`，将 `template_desensitize_map` 中的虚拟文本改为你模板中实际出现的脱敏名。也可通过 `--map` 指定自定义映射文件：`python extract_company.py 公司信息.docx --map my_map.json`
 
 ## 环境要求
 
@@ -287,7 +287,7 @@ Get-ChildItem -Recurse $tmp -Filter *.xml | ForEach-Object {
 
 ## 步骤5: 执行填充
 
-### > **大文件处理**：模板 >5MB 时自动使用 ill_large 纯 Python zipfile 引擎，零外部依赖，同样支持日期优先 + 占位符后处理。
+### > **大文件处理**：模板 >5MB 时自动使用 fill_large 纯 Python zipfile 引擎，零外部依赖，同样支持日期优先 + 占位符后处理。
 
 方式 A：Python（推荐）
 
@@ -328,17 +328,9 @@ python bid_pipeline.py 招标文件.md [--company-json 公司数据.json] [--tem
 
 ## 步骤6: 验证输出
 
-- `fill_template.js` 自动报告遗漏占位符
-- `fill_py.py` 自动报告未匹配的占位符
-- 手动检查：投标函抬头、授权书姓名、保证金账户、报价总表金额、签名区
+填充完成后自动运行 verify_bid.py 进行二次核对：
 
----
-
-## 步骤6: 验证输出（自动）
-
-填充完成后自动运行 erify_bid.py 进行二次核对：
-
-`ash
+```bash
 # 自动（pipeline 内置）
 python bid_pipeline.py 招标文件.pdf --company-docx 公司信息.docx
 # → 填充完成后自动审核每个输出文件
@@ -348,7 +340,7 @@ python verify_bid.py 成品标书.docx --company-docx 公司信息.docx
 
 # 跳过审核
 python bid_pipeline.py 招标文件.md --company-json company.json --no-verify
-`
+```
 
 **检查等级：**
 

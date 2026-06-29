@@ -1,100 +1,73 @@
-﻿---
+---
 name: qcc-bidding
-description: "企业招投标全维度尽调——Node.js fetch 直连企查查 API。覆盖企业工商、司法风险、经营罗盘、知识产权、董监高、历史存档 6 大 Server 共 69 个招投标核心工具。当用户说「查招投标」「查公司」「尽调XX公司」「评估供应商」「找投标机会」时必须使用。"
+description: "只要用户提到「查公司」「尽调」「供应商评估」「查招投标」「找投标机会」「投标合规」「查企业」「查竞争对手」「企业背景」「工商信息」「司法风险」，就必须使用此 skill。Node.js 直连企查查 API，覆盖工商、司法风险、经营罗盘、知识产权、董监高、历史存档 6 大维度 70 个招投标核心工具。即使用户只说「帮我看看这家公司」也要触发。"
 ---
 
 # 企查查招投标尽调
 
-> 调用链：`node -e fetch()` → `agent.qcc.com/mcp/<server>/stream` → JSON 数据。每次独立调用，不依赖 MCP 代理。
+> 调用链：`node qcc_client.js` → `agent.qcc.com/mcp/<server>/stream` → JSON 数据。每次独立调用，不依赖 MCP 代理。
 
+## 首次使用：设置 API Key
 
-## ⚠️ 首次使用：申请 API Key
+本 Skill 通过 **`.env` 文件**管理 API Key。用户将 Key 告诉你后，你必须自动写入。
 
-本 Skill 不含内置 Key，首次使用必须申请自己的：
+**Agent 自动设置流程（当用户说"我的Key是xxx"时执行）：**
 
-1. 访问 **[https://agent.qcc.com](https://agent.qcc.com)** 注册账号
-2. 登录后点击「免费注册拿 API Key」获取 Key（免费赠送 500 积分）
-3. 在本文件中**全局搜索 YOUR_API_KEY**，**全部替换**为你的 API Key
-4. 保存文件，即可使用
+```
+1. 识别用户提供的 Key 字符串
+2. 将 Key 写入 qcc-bidding/.env 文件（替换 your_key_here）：
+   QCC_API_KEY=用户提供的Key
+3. 验证：node qcc_client.js company get_company_profile "华为" 应返回正常数据
+```
 
-> 每个 Key 独立计费，**请勿将含 Key 的 Skill 文件分享给他人**。Key 过期后重新申请并替换即可。
+> Key 未设置时提示用户：去 https://agent.qcc.com 注册获取 Key，然后直接告诉 Agent "我的Key是xxx"，Agent 会自动写入 .env 文件。
+> Key 独立计费。Key 过期后重新申请并告诉 Agent 新 Key 即可。
+> 脚本读取顺序：系统环境变量 → .env 文件
 
----## API 端点
+---
+
+## API 端点
 
 | Server | 端点 | 工具数 | 用途 |
 |--------|------|--------|------|
-| 企业工商 | `agent.qcc.com/mcp/company/stream` | 16 | 注册信息、股东、实控人、财务、年报 |
-| 司法风险 | `agent.qcc.com/mcp/risk/stream` | 36 | 失信、被执行、裁判文书、行政处罚、欠税 |
-| 经营罗盘 | `agent.qcc.com/mcp/operation/stream` | 35 | 招投标、资质、信用、纳税、舆情、荣誉 |
-| 知识产权 | `agent.qcc.com/mcp/ipr/stream` | 18 | 商标、专利、软著、企业标准 |
-| 董监高 | `agent.qcc.com/mcp/executive/stream` | 43 | 董监高任职、关联企业、风险扫描 |
+| 企业工商 | `agent.qcc.com/mcp/company/stream` | 13 | 注册信息、股东、实控人、财务、年报 |
+| 司法风险 | `agent.qcc.com/mcp/risk/stream` | 23 | 失信、被执行、裁判文书、行政处罚、欠税 |
+| 经营罗盘 | `agent.qcc.com/mcp/operation/stream` | 17 | 招投标、资质、信用、纳税、舆情、荣誉 |
+| 知识产权 | `agent.qcc.com/mcp/ipr/stream` | 7 | 商标、专利、软著、企业标准 |
+| 董监高 | `agent.qcc.com/mcp/executive/stream` | 7 | 董监高任职、关联企业、风险扫描 |
 | 历史存档 | `agent.qcc.com/mcp/history/stream` | 3 | 历史工商/股东/失信（需企业认证） |
 
 ---
 
-## 命令格式
-
-场景中每条命令的格式为 `Server Tool "公司名"`，执行时替换到下面模板中：
-
-| 命令中的字段 | 替换到模板 |
-|-------------|-----------|
-| `company` / `risk` / `operation` / `ipr` / `executive` / `history` | `SERVER` |
-| `get_xxx` | `TOOL_NAME` |
-| `"公司全称"` | `COMPANY_NAME` |
-
 ## 通用调用模板
 
+所有场景使用独立脚本 `qcc_client.js`：
+
 ```bash
-node -e "
-const KEY='COMPANY_NAME';
-fetch('https://agent.qcc.com/mcp/SERVER/stream',{
-  method:'POST',
-  headers:{
-    'Content-Type':'application/json',
-    'Authorization':'Bearer YOUR_API_KEY'
-  },
-  body:JSON.stringify({
-    jsonrpc:'2.0',id:1,method:'tools/call',
-    params:{name:'TOOL_NAME',arguments:{searchKey:KEY}}
-  })
-}).then(r=>r.text()).then(t=>{
-  const d=JSON.parse(t.split('\n').find(l=>l.startsWith('data:')).slice(6));
-  console.log(JSON.stringify(JSON.parse(d.result.content[0].text),null,2));
-}).catch(e=>console.error(e.message))
-"
+# 通用格式
+node qcc_client.js <SERVER> <TOOL_NAME> "公司全称"
+
+# SERVER: company | risk | operation | ipr | executive | history
+# TOOL_NAME: 见下方工具列表
 ```
 
-## 招投标 & 财务数据的格式化模板
+### 招投标专用格式化
 
-以下两个工具输出量大，用专用格式化替代通用 JSON dump：
-
-**招投标**（替换模板 `.then(t=>{...})` 部分）：
-```js
-.then(t=>{
-  const d=JSON.parse(t.split('\n').find(l=>l.startsWith('data:')).slice(6));
-  const r2=JSON.parse(d.result.content[0].text);
-  console.log('## '+r2.摘要);
-  r2.招投标信息.slice(0,15).forEach(b=>
-    console.log('| '+b.发布日期+' | '+b.中标金额+' | '+(b.中标单位||[]).join('/')+' | '+b.项目名称.substring(0,60)+' |')
-  );
-})
+```bash
+node qcc_bidding_fmt.js "公司全称"
 ```
 
-**财务数据**（替换模板 `.then(t=>{...})` 部分）：
-```js
-.then(t=>{
-  const d=JSON.parse(t.split('\n').find(l=>l.startsWith('data:')).slice(6));
-  const r2=JSON.parse(d.result.content[0].text);
-  (r2.财务数据信息||[]).forEach(f=>{
-    const m=f.指标详情&&f.指标详情.主要财务指标;
-    if(m) console.log(f.报告期,'营收:'+m.营业总收入,'利润:'+m.利润总额,'资产:'+m.总资产);
-    const a=f.指标详情&&f.指标详情.分析数据;
-    if(a) console.log('  净利率:'+a.盈利能力.净利率+'%','负债率:'+a.偿还能力.资产负债率+'%','营收增速:'+a.成长能力.营业收入同比+'%');
-  });
-})
+自动以表格输出招投标 TOP 15 记录。
+
+### 财务数据格式化
+
+```bash
+node qcc_client.js company get_financial_data "公司全称"
 ```
 
-> **原则**：能用表格/字段提取的就用专用格式化；其余工具走通用 JSON dump 即可。
+输出 JSON 后按需提取：营收、利润、资产、净利率、负债率、营收增速。
+
+> **原则**：能用格式化脚本的就用；其余工具走通用 `qcc_client.js` 输出 JSON。
 
 ---
 
@@ -211,14 +184,14 @@ fetch('https://agent.qcc.com/mcp/SERVER/stream',{
 先模糊搜索锁定全称 → 再并行查工商+失信+招投标：
 
 ```
-步骤1：company get_company_by_query "关键词"
+步骤1：node qcc_client.js company get_company_by_query "关键词"
 步骤2（并行）：
-  company get_company_registration_info "全称"
-  risk get_dishonest_info "全称"
-  operation get_bidding_info "全称"
+  node qcc_client.js company get_company_registration_info "全称"
+  node qcc_client.js risk get_dishonest_info "全称"
+  node qcc_bidding_fmt.js "全称"
 ```
 
-输出：**企业概览** + **风险速览** + **招投标 TOP 5**（`get_bidding_info` 用专用格式化）。
+输出：**企业概览** + **风险速览** + **招投标 TOP 15**。
 
 ---
 
@@ -228,37 +201,37 @@ fetch('https://agent.qcc.com/mcp/SERVER/stream',{
 
 ### 第 1 批：基础画像 (4 条)
 ```
-company get_company_registration_info "全称"
-company get_actual_controller "全称"
-company get_shareholder_info "全称"
-company get_company_profile "全称"
+node qcc_client.js company get_company_registration_info "全称"
+node qcc_client.js company get_actual_controller "全称"
+node qcc_client.js company get_shareholder_info "全称"
+node qcc_client.js company get_company_profile "全称"
 ```
 
 ### 第 2 批：一键风险 + 一票否决 (5 条)
 ```
-risk get_company_risk_scan "全称"
-risk get_bankruptcy_reorganization "全称"
-risk get_guarantee_info "全称"
-risk get_chattel_mortgage_info "全称"
-executive get_executive_risk_scan "全称"
+node qcc_client.js risk get_company_risk_scan "全称"
+node qcc_client.js risk get_bankruptcy_reorganization "全称"
+node qcc_client.js risk get_guarantee_info "全称"
+node qcc_client.js risk get_chattel_mortgage_info "全称"
+node qcc_client.js executive get_executive_risk_scan "全称"
 ```
 
 ### 第 3 批：经营实力 (5 条)
 ```
-operation get_bidding_info "全称"
-operation get_qualifications "全称"
-operation get_credit_evaluation "全称"
-operation get_taxpayer_qualification "全称"
-company get_financial_data "全称"
+node qcc_bidding_fmt.js "全称"
+node qcc_client.js operation get_qualifications "全称"
+node qcc_client.js operation get_credit_evaluation "全称"
+node qcc_client.js operation get_taxpayer_qualification "全称"
+node qcc_client.js company get_financial_data "全称"
 ```
 
-### 第 4 批：深度维度 (5 条·按需)
+### 第 4 批：深度维度 (5 条，按需)
 ```
-operation get_news_sentiment "全称"
-operation get_honor_info "全称"
-ipr get_patent_info "全称"
-ipr get_standard_info "全称"
-executive get_executive_related_companies "全称"
+node qcc_client.js operation get_news_sentiment "全称"
+node qcc_client.js operation get_honor_info "全称"
+node qcc_client.js ipr get_patent_info "全称"
+node qcc_client.js ipr get_standard_info "全称"
+node qcc_client.js executive get_executive_related_companies "全称"
 ```
 
 ### 汇总报告结构
@@ -296,11 +269,11 @@ executive get_executive_related_companies "全称"
 ## 场景三：招投标专项
 
 ```
-operation get_bidding_info "全称"        # 招投标历史（专用格式化）
-operation get_qualifications "全称"      # 资质证书
-operation get_honor_info "全称"          # 获奖荣誉
-ipr get_standard_info "全称"             # 企业标准
-company get_financial_data "全称"        # 财务实力（专用格式化）
+node qcc_bidding_fmt.js "全称"
+node qcc_client.js operation get_qualifications "全称"
+node qcc_client.js operation get_honor_info "全称"
+node qcc_client.js ipr get_standard_info "全称"
+node qcc_client.js company get_financial_data "全称"
 ```
 
 ---
@@ -308,11 +281,11 @@ company get_financial_data "全称"        # 财务实力（专用格式化）
 ## 场景四：关联关系穿透
 
 ```
-company get_actual_controller "全称"
-company get_shareholder_info "全称"
-executive get_executive_positions "全称"
-executive get_executive_controlled_companies "全称"
-executive get_executive_related_companies "全称"
+node qcc_client.js company get_actual_controller "全称"
+node qcc_client.js company get_shareholder_info "全称"
+node qcc_client.js executive get_executive_positions "全称"
+node qcc_client.js executive get_executive_controlled_companies "全称"
+node qcc_client.js executive get_executive_related_companies "全称"
 ```
 
 ---
@@ -322,15 +295,15 @@ executive get_executive_related_companies "全称"
 重点关注招标文件中的禁止性条款：
 
 ```
-risk get_company_risk_scan "全称"               # 综合风险
-risk get_bankruptcy_reorganization "全称"       # 破产重整（一票否决）
-risk get_serious_violation "全称"               # 严重违法（一票否决）
-risk get_dishonest_info "全称"                  # 失信（一票否决）
-risk get_tax_arrears_notice "全称"              # 欠税
-risk get_high_consumption_restriction "全称"    # 限高
-risk get_guarantee_info "全称"                  # 对外担保
-risk get_chattel_mortgage_info "全称"           # 动产抵押
-operation get_government_interview "全称"       # 政府约谈
+node qcc_client.js risk get_company_risk_scan "全称"
+node qcc_client.js risk get_bankruptcy_reorganization "全称"
+node qcc_client.js risk get_serious_violation "全称"
+node qcc_client.js risk get_dishonest_info "全称"
+node qcc_client.js risk get_tax_arrears_notice "全称"
+node qcc_client.js risk get_high_consumption_restriction "全称"
+node qcc_client.js risk get_guarantee_info "全称"
+node qcc_client.js risk get_chattel_mortgage_info "全称"
+node qcc_client.js operation get_government_interview "全称"
 ```
 
 ---
@@ -340,14 +313,11 @@ operation get_government_interview "全称"       # 政府约谈
 用户说「找标」「有什么可投的」时，从经营罗盘中挖掘机会：
 
 ```
-operation get_land_grant_info "地区或关键词"               # 土地出让（工程标）
-operation get_property_rights_transaction "地区或关键词"   # 产权交易（国资标）
-operation get_asset_auction "地区或关键词"                 # 资产拍卖
-operation get_government_announcement "关键词"             # 政府公告
-operation get_company_announcement "关键词"                # 企业公告
+node qcc_client.js operation get_land_grant_info "地区或关键词"
+node qcc_client.js operation get_property_rights_transaction "地区或关键词"
+node qcc_client.js operation get_asset_auction "地区或关键词"
+node qcc_client.js operation get_government_announcement "关键词"
+node qcc_client.js operation get_company_announcement "关键词"
 ```
 
 > `searchKey` 可以填地区名（如"苏州"）、行业关键词（如"市政工程"）或留空。
-
-
-
