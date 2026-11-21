@@ -63,7 +63,7 @@ Use these signals to determine which product, and therefore which repo + Bitable
 
 | Signal | Product | Repository | Bitable |
 |--------|---------|------------|---------|
-| URL contains `cse-admin-staging.cherry-ai.com` / `enterprise-api` / "SaaS" / "Enterprise" | **Enterprise / SaaS** | `<ENTERPRISE_REPO>` | `IJQPbTzZhaObMQsuL5OcbaoBnag` / `tbl20SIk4B78Ydpg` |
+| Test document identifies an Enterprise / SaaS product | **Enterprise / SaaS** | `<ENTERPRISE_REPO>` | `IJQPbTzZhaObMQsuL5OcbaoBnag` / `tbl20SIk4B78Ydpg` |
 | Mentions "client" / "desktop" / Electron | **Desktop Client** | `<DESKTOP_REPO>` | `AdeDbC9VgaNkrEsXtk5cTMarn2e` / `tbl7eUvrbfM7XFqg` |
 | Neither clear | Ask user | — | — |
 
